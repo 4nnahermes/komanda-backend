@@ -19,7 +19,7 @@ A justificativa da escolha está em [docs/stack-backend.md](docs/stack-backend.m
 | Ferramenta | Versão | Como conferir |
 |---|---|---|
 | Node.js | 20 LTS ou mais recente | `node -v` |
-| PostgreSQL | 14 ou mais recente | pgAdmin aberto ou `psql --version` |
+| PostgreSQL | 14 ou mais recente (só para banco local) | pgAdmin aberto ou `psql --version` |
 | Git | qualquer recente | `git --version` |
 
 Editor recomendado: VS Code.
@@ -39,17 +39,9 @@ cd komanda-backend
 npm install
 ```
 
-**3. Criar o banco**
+**3. Configurar o `.env`**
 
-No pgAdmin (ou no `psql`), crie um banco vazio chamado `komanda`:
-
-```sql
-CREATE DATABASE komanda;
-```
-
-**4. Configurar o `.env`**
-
-Copie o arquivo de exemplo e coloque a senha do **seu** PostgreSQL:
+Copie o arquivo de exemplo:
 
 ```bash
 # Windows (PowerShell)
@@ -59,7 +51,21 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-O `.env` fica só na sua máquina e não vai para o GitHub.
+O `.env` fica só na sua máquina e não vai para o GitHub. Escolha uma das opções de banco:
+
+**Opção A — banco online da equipe:** cole em `DATABASE_URL` a connection string que a equipe compartilhou por mensagem privada. Não precisa instalar o PostgreSQL.
+
+**Opção B — banco local:** deixe `DATABASE_URL` vazio, crie um banco vazio chamado `komanda` no pgAdmin (ou no `psql`) e preencha a senha do **seu** PostgreSQL em `DB_PASSWORD`:
+
+```sql
+CREATE DATABASE komanda;
+```
+
+**4. Criar as tabelas**
+
+```bash
+npm run migration:run
+```
 
 **5. Subir a API**
 
@@ -111,6 +117,7 @@ A partir da Sprint 2, cada módulo segue o padrão em camadas: `entity` → `ser
 ## Problemas comuns
 
 - **"Não foi possível conectar ao banco"**: confira se o PostgreSQL está rodando, se o banco `komanda` existe e se a senha no `.env` está certa.
+- **Banco online não conecta**: confira se a `DATABASE_URL` foi colada inteira, sem espaços nem aspas.
 - **Porta 3000 ocupada**: troque `PORT` no `.env`.
 - **`password authentication failed`**: a senha em `DB_PASSWORD` não é a do seu usuário `postgres`.
 
