@@ -95,24 +95,30 @@ Abra http://localhost:3000/health no navegador (ou no Postman/Insomnia). A respo
 | `npm run dev` | Sobe a API em modo desenvolvimento (reinicia ao salvar) |
 | `npm run build` | Compila o TypeScript para `dist/` |
 | `npm start` | Roda a versão compilada |
+| `npm test` | Roda os testes automatizados |
 | `npm run migration:generate -- src/migrations/NomeDaMigration` | Gera uma migration a partir das mudanças nas entidades |
 | `npm run migration:run` | Aplica as migrations pendentes no banco |
 | `npm run migration:revert` | Desfaz a última migration |
 
 ## Estrutura
 
+O backend segue a arquitetura limpa. A explicação das camadas, o caminho de uma requisição e o passo a passo para criar um módulo estão em [docs/arquitetura.md](docs/arquitetura.md).
+
 ```
 src/
   server.ts         ponto de entrada: conecta no banco e sobe a API
   app.ts            configuração do Express e registro das rotas
   data-source.ts    conexão com o PostgreSQL (lê o .env)
-  routes/           rotas
-  entity/           entidades do TypeORM (tabelas)
+  dominio/          regras de negócio puras
+  aplicacao/        casos de uso
+  infraestrutura/   repositórios e consultas com TypeORM
+  interfaces/http/  rotas, controllers, validação e tratamento de erros
+  main/             montagem dos módulos
+  entity/           modelos de tabela do TypeORM
   migrations/       migrations versionadas do banco
+test/               testes automatizados, espelhando src/
 docs/               documentação do projeto
 ```
-
-A partir da Sprint 2, cada módulo segue o padrão em camadas: `entity` → `service` (regras de negócio) → `controller` → `router`.
 
 ## Problemas comuns
 

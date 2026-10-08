@@ -5,6 +5,7 @@ import { healthRotas } from "./routes/health-router";
 import { CategoriaService } from "./service/categoria-service";
 import { CategoriaController } from "./controller/categoria-controller";
 import { categoriaRotas } from "./routes/categoria-router";
+import { tratarErros } from "./interfaces/http/tratar-erros";
 
 export const app = express();
 
@@ -17,11 +18,5 @@ app.use("/health", healthRotas());
 const categoriaController = new CategoriaController(new CategoriaService(AppDataSource));
 app.use("/api/categorias", categoriaRotas(categoriaController));
 
-// JSON inválido no corpo da requisição
-app.use((erro: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if (erro?.type === "entity.parse.failed") {
-        res.status(400).json({ erro: "O corpo da requisição não é um JSON válido" });
-        return;
-    }
-    next(erro);
-});
+// Tratamento de erros: sempre o último middleware registrado.
+app.use(tratarErros);
