@@ -1,3 +1,4 @@
+import { ConsultaCardapio } from "../../src/aplicacao/cardapio/cardapio/consulta-cardapio";
 import { ConsultaProdutos, FiltroProdutos, ProdutoDetalhado } from "../../src/aplicacao/cardapio/produtos/consulta-produtos";
 import { CategoriaResumida, CategoriasDoCardapio } from "../../src/dominio/cardapio/categorias-do-cardapio";
 import { Produto } from "../../src/dominio/cardapio/produto";
@@ -61,6 +62,19 @@ export class CardapioEmMemoria {
             const produto = this.produtos.get(id);
             return produto ? this.detalhar(produto) : null;
         },
+    };
+
+    readonly consultaCardapio: ConsultaCardapio = {
+        listarItensAtivos: async () =>
+            [...this.produtos.values()]
+                .filter((p) => p.ativo && this.categoria(p.categoriaId).ativo)
+                .map((p) => {
+                    const categoria = this.categoria(p.categoriaId);
+                    return {
+                        categoria: { id: categoria.id, nome: categoria.nome, ordem: categoria.ordem },
+                        produto: { id: p.id as number, nome: p.nome, descricao: p.descricao, preco: p.preco.emReais },
+                    };
+                }),
     };
 
     private ordemDaCategoria(produto: Produto): number {
