@@ -96,6 +96,7 @@ Abra http://localhost:3000/health no navegador (ou no Postman/Insomnia). A respo
 | `npm run build` | Compila o TypeScript para `dist/` |
 | `npm start` | Roda a versão compilada |
 | `npm test` | Roda os testes automatizados |
+| `npm run typecheck` | Confere os tipos do código e dos testes |
 | `npm run migration:generate -- src/migrations/NomeDaMigration` | Gera uma migration a partir das mudanças nas entidades |
 | `npm run migration:run` | Aplica as migrations pendentes no banco |
 | `npm run migration:revert` | Desfaz a última migration |
