@@ -1,0 +1,88 @@
+### Testes manuais da US01 — Cadastro de categorias
+### Abra no VS Code com a extensão "REST Client" e clique em "Send Request" acima de cada bloco.
+### Rode na ordem. Ajuste os ids se o banco já tiver categorias.
+
+@base = http://localhost:3000/api/categorias
+
+### 1. Criar "Xis" (entra na posição 1)
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Xis" }
+
+### 2. Criar "Bebidas" (entra no fim)
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Bebidas" }
+
+### 3. Criar "Bauru" na posição 2 (Bebidas desce para 3)
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Bauru", "ordem": 2 }
+
+### 4. Listar todas, em ordem
+GET {{base}}
+
+### 5. Listar só as ativas
+GET {{base}}?ativo=true
+
+### 6. Buscar por id
+GET {{base}}/1
+
+### 7. Editar o nome
+PATCH {{base}}/1
+Content-Type: application/json
+
+{ "nome": "Xis e Sanduíches" }
+
+### 8. Desativar
+PATCH {{base}}/2
+Content-Type: application/json
+
+{ "ativo": false }
+
+### 9. Reordenar (todos os ids, na nova ordem)
+PATCH {{base}}/ordem
+Content-Type: application/json
+
+{ "ids": [3, 1, 2] }
+
+### 10. Excluir (as seguintes sobem uma posição)
+DELETE {{base}}/2
+
+### ---------- Erros esperados ----------
+
+### 400 — nome vazio
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "   " }
+
+### 409 — nome repetido (sem diferenciar maiúsculas)
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "BEBIDAS" }
+
+### 400 — PATCH sem campos
+PATCH {{base}}/1
+Content-Type: application/json
+
+{}
+
+### 400 — ativo inválido
+PATCH {{base}}/1
+Content-Type: application/json
+
+{ "ativo": "sim" }
+
+### 400 — lista de ordem incompleta
+PATCH {{base}}/ordem
+Content-Type: application/json
+
+{ "ids": [1] }
+
+### 404 — categoria inexistente
+GET {{base}}/9999
