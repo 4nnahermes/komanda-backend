@@ -1,0 +1,38 @@
+### Testes manuais da US03 — Consulta do cardápio
+### Abra no VS Code com a extensão "REST Client" e clique em "Send Request" acima de cada bloco.
+### Rode depois do categorias.http e do produtos.http, para ter dados cadastrados.
+
+@api = http://localhost:3000/api
+
+### 1. Cardápio: categorias ativas em ordem, com os produtos ativos por nome
+GET {{api}}/cardapio
+
+### 2. Desativar um produto: ele some do cardápio
+PATCH {{api}}/produtos/1
+Content-Type: application/json
+
+{ "ativo": false }
+
+### 3. Conferir o cardápio de novo
+GET {{api}}/cardapio
+
+### 4. Reativar o produto
+PATCH {{api}}/produtos/1
+Content-Type: application/json
+
+{ "ativo": true }
+
+### 5. Desativar a categoria 1: ela e os produtos dela somem do cardápio
+PATCH {{api}}/categorias/1
+Content-Type: application/json
+
+{ "ativo": false }
+
+### 6. Conferir o cardápio de novo
+GET {{api}}/cardapio
+
+### 7. Reativar a categoria: os produtos voltam
+PATCH {{api}}/categorias/1
+Content-Type: application/json
+
+{ "ativo": true }
