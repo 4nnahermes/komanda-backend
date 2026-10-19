@@ -199,8 +199,8 @@ Define a ordem de todas as categorias de uma vez, como fica depois de o atendent
 
 | Campo | Tipo | Regra |
 |---|---|---|
-| `nome` | texto | obrigatório, 1 a 80 caracteres, único dentro da categoria |
-| `descricao` | texto | opcional, até 255 caracteres |
+| `nome` | texto | obrigatório, 1 a 80 caracteres, único dentro da categoria (sem diferenciar maiúsculas) |
+| `descricao` | texto | opcional, até 255 caracteres; vazia é gravada como `null` |
 | `preco` | número | obrigatório, maior que zero, até 2 casas decimais |
 | `ativo` | booleano | `true` ao criar |
 | `categoria` | objeto | a categoria do produto (`id` e `nome`) |
@@ -217,6 +217,13 @@ Lista os produtos ordenados pela ordem da categoria e depois pelo nome.
 | `ativo` | não | `true` ou `false` |
 
 **200 OK** — array de objetos `Produto`.
+
+**Erros**
+
+| Código | Mensagem |
+|---|---|
+| 400 | `O filtro categoriaId deve ser um número inteiro maior que zero` |
+| 400 | `O filtro ativo deve ser true ou false` |
 
 ### `GET /api/produtos/:id`
 
@@ -243,9 +250,15 @@ Lista os produtos ordenados pela ordem da categoria e depois pelo nome.
 | Código | Mensagem |
 |---|---|
 | 400 | `O nome do produto é obrigatório` |
+| 400 | `O nome do produto deve ter no máximo 80 caracteres` |
+| 400 | `O preço do produto é obrigatório` |
+| 400 | `O preço deve ser um número` |
 | 400 | `O preço deve ser maior que zero` |
+| 400 | `O preço deve ter no máximo 2 casas decimais` |
 | 400 | `Informe a categoria do produto` |
 | 400 | `Categoria não encontrada` |
+| 400 | `A descrição deve ser um texto` |
+| 400 | `A descrição deve ter no máximo 255 caracteres` |
 | 409 | `Já existe um produto com esse nome nesta categoria` |
 
 ### `PATCH /api/produtos/:id`
@@ -261,6 +274,12 @@ Edita nome, descrição, preço, categoria e/ou status. Só os campos enviados s
 ```json
 { "ativo": false }
 ```
+
+```json
+{ "descricao": null }
+```
+
+Enviar `descricao: null` remove a descrição. Mudar o nome ou a categoria confere de novo se o nome está livre na categoria de destino.
 
 **200 OK** — o objeto `Produto` atualizado.
 
@@ -389,3 +408,4 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 |---|---|---|
 | 0.1 | 06/10/2026 | Primeira versão: convenções, categorias, produtos e cardápio detalhados; demais rotas listadas |
 | 0.2 | 06/10/2026 | Edição passa a ser só por `PATCH` (o status `ativo` vai no mesmo `PATCH`); incluída a exclusão com `DELETE` em categorias, produtos e demais cadastros |
+| 0.3 | 07/10/2026 | Produtos: mensagens de erro de tamanho, tipo e casas decimais; erros dos filtros da listagem; `descricao: null` no `PATCH` |

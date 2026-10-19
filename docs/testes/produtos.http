@@ -1,0 +1,97 @@
+### Testes manuais da US02 — Cadastro de produtos
+### Abra no VS Code com a extensão "REST Client" e clique em "Send Request" acima de cada bloco.
+### Rode depois do categorias.http: os produtos usam as categorias 1 (Xis) e 2 (Bebidas).
+### Ajuste os ids se o banco já tiver produtos.
+
+@base = http://localhost:3000/api/produtos
+
+### 1. Criar "Xis Carne" na categoria 1
+POST {{base}}
+Content-Type: application/json
+
+{
+  "nome": "Xis Carne",
+  "categoriaId": 1,
+  "descricao": "Pão, hambúrguer, ovo, presunto, queijo, alface, tomate e milho",
+  "preco": 32.9
+}
+
+### 2. Criar "Xis Coração" na categoria 1
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Xis Coração", "categoriaId": 1, "preco": 36.5 }
+
+### 3. Criar "Refrigerante lata" na categoria 2
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Refrigerante lata", "categoriaId": 2, "preco": 7 }
+
+### 4. Listar todos (ordem da categoria, depois nome)
+GET {{base}}
+
+### 5. Listar só os da categoria 1
+GET {{base}}?categoriaId=1
+
+### 6. Buscar o produto 1
+GET {{base}}/1
+
+### 7. Mudar o preço
+PATCH {{base}}/1
+Content-Type: application/json
+
+{ "preco": 34.9 }
+
+### 8. Desativar (sai do cardápio, continua cadastrado)
+PATCH {{base}}/2
+Content-Type: application/json
+
+{ "ativo": false }
+
+### 9. Listar só os inativos
+GET {{base}}?ativo=false
+
+### 10. Excluir o produto 3
+DELETE {{base}}/3
+
+### --- Erros esperados ---
+
+### 400: nome obrigatório
+POST {{base}}
+Content-Type: application/json
+
+{ "categoriaId": 1, "preco": 10 }
+
+### 400: preço maior que zero
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Xis Teste", "categoriaId": 1, "preco": 0 }
+
+### 400: preço com mais de 2 casas decimais
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Xis Teste", "categoriaId": 1, "preco": 10.999 }
+
+### 400: categoria inexistente
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "Xis Teste", "categoriaId": 999, "preco": 10 }
+
+### 409: nome repetido na categoria (sem diferenciar maiúsculas)
+POST {{base}}
+Content-Type: application/json
+
+{ "nome": "xis carne", "categoriaId": 1, "preco": 10 }
+
+### 400: PATCH sem campos
+PATCH {{base}}/1
+Content-Type: application/json
+
+{}
+
+### 404: produto inexistente
+GET {{base}}/999
