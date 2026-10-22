@@ -127,4 +127,3 @@ async function fecharLacuna(manager: EntityManager, ordemRemovida: number): Prom
 function paraDominio(modelo: CategoriaModelo): Categoria {
     return Categoria.restaurar({ id: modelo.id, nome: modelo.nome, ordem: modelo.ordem, ativo: modelo.ativo });
 }
-
