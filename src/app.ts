@@ -8,6 +8,7 @@ import { categoriaRotas } from "./routes/categoria-router";
 import { tratarErros } from "./interfaces/http/tratar-erros";
 import { dependenciasProdutosTypeorm, montarRotasProdutos } from "./main/produtos";
 import { consultaCardapioTypeorm, montarRotasCardapio } from "./main/cardapio";
+import { dependenciasBairrosTypeorm, montarRotasBairros } from "./main/bairros";
 
 export const app = express();
 
@@ -25,6 +26,9 @@ app.use("/api/produtos", montarRotasProdutos(dependenciasProdutosTypeorm(AppData
 
 // US03 — Consulta do cardápio
 app.use("/api/cardapio", montarRotasCardapio(consultaCardapioTypeorm(AppDataSource)));
+
+// US06 — Cadastro de bairros e taxas de entrega
+app.use("/api/bairros", montarRotasBairros(dependenciasBairrosTypeorm(AppDataSource)));
 
 // Tratamento de erros: sempre o último middleware registrado.
 app.use(tratarErros);
