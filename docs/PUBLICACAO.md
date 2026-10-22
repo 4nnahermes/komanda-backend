@@ -44,3 +44,7 @@ Aguardar o membro ficar PRIMARY. A conexão local é `mongodb://127.0.0.1:55440/
 - [Prisma MongoDB 6](https://www.prisma.io/docs/orm/v6/overview/databases/mongodb)
 - [Express na Vercel](https://vercel.com/docs/frameworks/backend/express)
 - [Conexão com MongoDB Atlas](https://www.mongodb.com/docs/atlas/connect-to-your-cluster/)
+
+## Ambiente publicado
+
+Em 22/10/2026, backend em https://komanda-backend.vercel.app e frontend em https://komanda-frontend.vercel.app, usando Atlas. A preparação inicial dos índices foi executada explicitamente no primeiro deploy e removida do comando de build logo depois. O build configurado permanece `npm run build`; a string de conexão existe somente como variável secreta do projeto backend. Verificação de produção registrada em [prisma-mongodb.md](validacao/prisma-mongodb.md).

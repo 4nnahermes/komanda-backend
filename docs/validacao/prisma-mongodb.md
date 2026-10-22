@@ -14,8 +14,12 @@ Em 22/10/2026, na cópia `GabrielLTM/komanda-backend` derivada da versão origin
 - Revisão independente identificou a necessidade de explicitar o teto monetário anteriormente imposto pela coluna SQL; correção incluída no domínio e na validação HTTP.
 - `npm audit`: zero vulnerabilidades reportadas na verificação final. CLI e Client Prisma permanecem fixados em versão compatível com MongoDB; dependência transitiva deepmerge-ts usa override 8.0.2, validado com generate/validate/db push. Ferramentas de desenvolvimento atualizadas e verificadas em Node 24.
 
-## Pendências externas
+## Publicação real — 22/10/2026
 
-A URI do Atlas será inserida pelo usuário na Vercel. Nenhuma conexão com o Atlas/Supabase real, migração de dados PostgreSQL, criação de dados demonstrativos em produção ou deploy do backend foi realizada nesta validação. O schema/índices no Atlas precisam ser preparados explicitamente e a API publicada deve ser conferida com `/health` e os cadastros após a configuração.
+O usuário inseriu a conexão diretamente no painel da Vercel, sem gravá-la no repositório. O banco configurado é `komanda`. As coleções e índices foram preparados uma única vez na publicação inicial com um override explícito de build `npm run db:push && npm run build`; depois o comando do projeto foi restaurado para `npm run build`. Os próximos builds não alteram índices automaticamente.
 
-O frontend publicado anteriormente continua sem essa conexão. Depois de publicar a API, configurar sua URL em `VITE_API_URL` e publicar a versão do frontend com integração.
+Backend publicado em https://komanda-backend.vercel.app. `/health` e listagens de categorias, produtos, bairros e motoboys responderam 200 no ambiente real. Frontend publicado em https://komanda-frontend.vercel.app, com `VITE_API_URL=https://komanda-backend.vercel.app/api` em Production e a integração de cadastros incorporada à main.
+
+Pelo navegador público, foram criados uma categoria e um produto de verificação, recuperados após recarregar a página e conferidos novamente pela API. Depois foram removidos somente esses dois registros próprios de verificação. A configuração do banco não foi exposta em logs ou commits. Nenhum dado do PostgreSQL/Supabase original foi importado ou modificado.
+
+Pedidos, quadro, estoque e caixa permanecem demonstrativos e não foram anunciados como persistidos no Atlas.
