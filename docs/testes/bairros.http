@@ -1,0 +1,35 @@
+### Criar bairro com entrega gratuita
+POST http://localhost:3000/api/bairros
+Content-Type: application/json
+
+{"nome":"Centro","taxaEntrega":0}
+
+### Criar com taxa em centavos e inativo
+POST http://localhost:3000/api/bairros
+Content-Type: application/json
+
+{"nome":"Bom Fim","taxaEntrega":5.25,"ativo":false}
+
+### Listar todos ou filtrar por ativo
+GET http://localhost:3000/api/bairros
+
+###
+GET http://localhost:3000/api/bairros?ativo=false
+
+### Buscar por id (substitua 1 pelo id criado)
+GET http://localhost:3000/api/bairros/1
+
+### Atualizar parcialmente e desativar
+PATCH http://localhost:3000/api/bairros/1
+Content-Type: application/json
+
+{"taxaEntrega":7.5,"ativo":false}
+
+### Repetir nome ignorando caixa retorna 409
+POST http://localhost:3000/api/bairros
+Content-Type: application/json
+
+{"nome":" centro ","taxaEntrega":2}
+
+### Excluir (bairro em uso retorna 409)
+DELETE http://localhost:3000/api/bairros/1
