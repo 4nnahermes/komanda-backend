@@ -7,10 +7,10 @@ export class Categoria {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "varchar", length: 60, unique: true })
+    @Column({ type: "varchar", length: 60 })
     nome: string;
 
-    // Posição no cardápio, começando em 1. O service reorganiza as demais ao mudar.
+    // Posição no cardápio, começando em 1.
     @Column({ type: "int" })
     ordem: number;
 

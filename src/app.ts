@@ -2,14 +2,12 @@ import express from "express";
 import cors from "cors";
 import { AppDataSource } from "./data-source";
 import { healthRotas } from "./routes/health-router";
-import { CategoriaService } from "./service/categoria-service";
-import { CategoriaController } from "./controller/categoria-controller";
-import { categoriaRotas } from "./routes/categoria-router";
 import { tratarErros } from "./interfaces/http/tratar-erros";
 import { dependenciasProdutosTypeorm, montarRotasProdutos } from "./main/produtos";
 import { consultaCardapioTypeorm, montarRotasCardapio } from "./main/cardapio";
 import { dependenciasBairrosTypeorm, montarRotasBairros } from "./main/bairros";
 import { dependenciasMotoboysTypeorm, montarRotasMotoboys } from "./main/motoboys";
+import { dependenciasCategoriasTypeorm, montarRotasCategorias } from "./main/categorias";
 
 export const app = express();
 
@@ -19,8 +17,7 @@ app.use(express.json());
 app.use("/health", healthRotas());
 
 // US01 — Cadastro de categorias
-const categoriaController = new CategoriaController(new CategoriaService(AppDataSource));
-app.use("/api/categorias", categoriaRotas(categoriaController));
+app.use("/api/categorias", montarRotasCategorias(dependenciasCategoriasTypeorm(AppDataSource)));
 
 // US02 — Cadastro de produtos
 app.use("/api/produtos", montarRotasProdutos(dependenciasProdutosTypeorm(AppDataSource)));
