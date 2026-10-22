@@ -17,6 +17,11 @@ describe("RepositorioMotoboysTypeorm", () => {
         const adapter = new RepositorioMotoboysTypeorm({ getRepository: () => repo } as never);
         await expect(adapter.excluir(1)).rejects.toEqual(new ConflitoDeDados("Não é possível excluir um motoboy em uso. Desative o motoboy"));
     });
+    it("informa quando DELETE concorrente não removeu registro", async () => {
+        const repo = { delete: vi.fn().mockResolvedValue({ affected: 0 }) };
+        const adapter = new RepositorioMotoboysTypeorm({ getRepository: () => repo } as never);
+        await expect(adapter.excluir(1)).resolves.toBe(false);
+    });
     it("atualiza somente as colunas enviadas no PATCH", async () => {
         const repo = { update: vi.fn().mockResolvedValue({ affected: 1 }) };
         const adapter = new RepositorioMotoboysTypeorm({ getRepository: () => repo } as never);

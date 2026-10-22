@@ -34,8 +34,8 @@ export class RepositorioMotoboysTypeorm implements RepositorioMotoboys {
             return (resultado.affected ?? 0) > 0;
         } catch (erro) { if (ehViolacaoDeUnicidade(erro)) throw new ConflitoDeDados("Já existe um motoboy com esse nome"); throw erro; }
     }
-    async excluir(id: number): Promise<void> {
-        try { await this.repositorio.delete(id); }
+    async excluir(id: number): Promise<boolean> {
+        try { return ((await this.repositorio.delete(id)).affected ?? 0) > 0; }
         catch (erro) { if (ehViolacaoDeChaveEstrangeira(erro)) throw new ConflitoDeDados("Não é possível excluir um motoboy em uso. Desative o motoboy"); throw erro; }
     }
 }

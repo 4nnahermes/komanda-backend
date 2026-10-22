@@ -6,7 +6,7 @@ Cobertura automatizada inclui regras da entidade, mensagens e status HTTP, CRUD 
 
 Validação executada após `npm ci`:
 
-- `npm test` — 85 testes passaram.
+- `npm test` — 86 testes passaram.
 - `npm run typecheck` — passou.
 - `npm run build` — passou.
 - Migration aplicada e revertida, depois reaplicada no schema descartável `motoboys_agent` do container `komanda-sprint3-review`, sem usar `.env` ou o schema `public`.

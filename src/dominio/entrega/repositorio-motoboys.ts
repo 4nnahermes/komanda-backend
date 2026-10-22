@@ -5,7 +5,7 @@ export interface RepositorioMotoboys {
     existePorNome(nome: string, ignorarId?: number): Promise<boolean>;
     salvar(motoboy: Motoboy): Promise<number>;
     atualizar(id: number, campos: Partial<{ nome: string; telefone: string | null; valorFixoNoite: number; ativo: boolean }>): Promise<boolean>;
-    excluir(id: number): Promise<void>;
+    excluir(id: number): Promise<boolean>;
 }
 
 export interface FiltroMotoboys { ativo?: boolean; }

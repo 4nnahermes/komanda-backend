@@ -6,6 +6,6 @@ export class ExcluirMotoboy {
     constructor(private readonly repositorio: RepositorioMotoboys) {}
     async executar(id: number): Promise<void> {
         if (!(await this.repositorio.buscarPorId(id))) throw new RecursoNaoEncontrado(MENSAGENS.motoboyNaoEncontrado);
-        await this.repositorio.excluir(id);
+        if (!(await this.repositorio.excluir(id))) throw new RecursoNaoEncontrado(MENSAGENS.motoboyNaoEncontrado);
     }
 }

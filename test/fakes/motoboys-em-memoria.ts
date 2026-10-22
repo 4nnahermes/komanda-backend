@@ -19,7 +19,7 @@ export class MotoboysEmMemoria implements RepositorioMotoboys, ConsultaMotoboys 
         const atualizado = Motoboy.restaurar({ id, nome: campos.nome ?? antigo.nome, telefone: campos.telefone === undefined ? antigo.telefone : campos.telefone, valorFixoNoite: campos.valorFixoNoite === undefined ? antigo.valorFixoNoite : Dinheiro.deReais(campos.valorFixoNoite), ativo: campos.ativo ?? antigo.ativo });
         this.dados.set(id, atualizado); return true;
     }
-    async excluir(id: number): Promise<void> { this.dados.delete(id); }
+    async excluir(id: number): Promise<boolean> { return this.dados.delete(id); }
     async listar(filtro: { ativo?: boolean }): Promise<Motoboy[]> {
         return [...this.dados.values()].filter((m) => filtro.ativo === undefined || m.ativo === filtro.ativo).sort((a, b) => a.nome.localeCompare(b.nome) || a.id! - b.id!);
     }
