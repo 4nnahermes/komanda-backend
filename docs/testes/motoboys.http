@@ -1,0 +1,35 @@
+### Criar motoboy (telefone e valor omitidos usam null e zero)
+POST http://localhost:3000/api/motoboys
+Content-Type: application/json
+
+{"nome":"João Silva"}
+
+### Listar todos, incluindo inativos
+GET http://localhost:3000/api/motoboys
+
+### Filtrar ativos
+GET http://localhost:3000/api/motoboys?ativo=true
+
+### Buscar por id
+GET http://localhost:3000/api/motoboys/1
+
+### Atualizar e desativar
+PATCH http://localhost:3000/api/motoboys/1
+Content-Type: application/json
+
+{"telefone":"(51) 99999-0000","valorFixoNoite":40,"ativo":false}
+
+### Limpar telefone com null
+PATCH http://localhost:3000/api/motoboys/1
+Content-Type: application/json
+
+{"telefone":null}
+
+### Conflito de nome sem diferenciar caixa (esperado 409)
+POST http://localhost:3000/api/motoboys
+Content-Type: application/json
+
+{"nome":"JOÃO SILVA"}
+
+### Excluir
+DELETE http://localhost:3000/api/motoboys/1
