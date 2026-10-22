@@ -8,7 +8,7 @@
 
 ## Persistência PostgreSQL
 
-A migration `1792620000000-CriaBairro.ts` cria `bairro`, `numeric(10,2)` e índice único em `LOWER(nome)`. O roteiro `docs/testes/bairros.http` permite conferir o contrato via API. A validação com PostgreSQL descartável e migration up/down será registrada após execução local.
+A migration `1792620000000-CriaBairro.ts` cria `bairro`, `numeric(10,2)` e índice único em `LOWER(nome)`. O roteiro `docs/testes/bairros.http` permite conferir o contrato via API. Em 22/10/2026, a revisão independente executou migrations reais up/down/up e chamadas HTTP com PostgreSQL 16 descartável no container local `komanda-sprint3-review`, banco `komanda_test_sprint3`, schema isolado `bairros_review_<pid>` removido ao final. Passaram: taxa zero, limite 99999999.99, PATCH parcial, filtro ativo, reconexão com persistência, disputa concorrente entre Moinhos/moinhos (201/409) e exclusão protegida por FK de teste (409).
 
 ## Comandos
 
@@ -16,4 +16,4 @@ A migration `1792620000000-CriaBairro.ts` cria `bairro`, `numeric(10,2)` e índi
 - `npm test`: passou, 11 arquivos / 82 testes.
 - `npm run typecheck`: passou.
 - `npm run build`: passou.
-- PostgreSQL descartável: pendente da validação integrada do principal, que disponibilizou instância compartilhada para uso sequencial após a integração. Nenhum `.env` foi usado.
+- PostgreSQL descartável: passou na revisão descrita acima. Nenhum `.env` foi usado; nenhum banco da equipe foi acessado.
