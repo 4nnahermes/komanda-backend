@@ -12,7 +12,8 @@
     "typecheck": "tsc -p tsconfig.test.json",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
+    "test:postgres": "npm run build && node scripts/validar-sprint3-postgres.cjs"
   },
   "keywords": [],
   "author": "Anna Hermes, Diego Silva, Gabriel Lessa, Lucas Sol",
