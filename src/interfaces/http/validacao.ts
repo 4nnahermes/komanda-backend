@@ -14,7 +14,8 @@ export function validarCorpo<T extends z.ZodType>(esquema: T, corpo: unknown): z
 // Um id que não é inteiro positivo não existe no banco, então a resposta é 404.
 export function lerId(valor: unknown, mensagemNaoEncontrado: string): number {
     const id = Number(valor);
-    if (!Number.isInteger(id) || id <= 0) {
+    // Os ids serial do PostgreSQL usam integer assinado de 32 bits.
+    if (!Number.isInteger(id) || id <= 0 || id > 2_147_483_647) {
         throw new RecursoNaoEncontrado(mensagemNaoEncontrado);
     }
     return id;

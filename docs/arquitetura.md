@@ -65,6 +65,6 @@ npm test
 5. Montagem do módulo em `src/main/` e registro da rota no `app.ts`.
 6. Testes em `test/`, espelhando a estrutura de `src/`.
 
-## Transição
+## Categorias
 
-A US01 (categorias) foi feita antes desta estrutura e ainda usa `service`, `controller` e `routes` na raiz de `src/`. Ela será migrada para as camadas acima. Até lá, os modelos de tabela de `src/entity/` servem às duas formas.
+A US01 segue as mesmas camadas. O domínio e os casos de uso não dependem de Express ou TypeORM; o repositório TypeORM serializa as alterações de ordem dentro de transações PostgreSQL. O modelo de tabela permanece em `src/entity/` porque produtos e cardápio também usam a categoria.
