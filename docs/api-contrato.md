@@ -1,7 +1,7 @@
 # Contrato da API — Komanda
 
 Sprint 2 · Responsáveis: Anna Hermes e Gabriel Lessa
-Versão 0.1 · rascunho para revisão com a dupla de frontend
+Versão 0.4 · contratos de entrega propostos para a Sprint 3; revisão com a dupla de frontend pendente
 
 ---
 
@@ -408,4 +408,11 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 |---|---|---|
 | 0.1 | 06/10/2026 | Primeira versão: convenções, categorias, produtos e cardápio detalhados; demais rotas listadas |
 | 0.2 | 06/10/2026 | Edição passa a ser só por `PATCH` (o status `ativo` vai no mesmo `PATCH`); incluída a exclusão com `DELETE` em categorias, produtos e demais cadastros |
+| 0.4 | 22/10/2026 | Contratos complementares de bairros/motoboys, plano e limites da integração |
 | 0.3 | 07/10/2026 | Produtos: mensagens de erro de tamanho, tipo e casas decimais; erros dos filtros da listagem; `descricao: null` no `PATCH` |
+
+## Contratos complementares da Sprint 3
+
+- [Bairros e motoboys](contratos/cadastros-entrega.md): proposta detalhada; implementação entregue em PRs próprios.
+- [Alinhamento com as telas](contratos/alinhamento-frontend.md): adaptações e decisões pendentes da issue #25.
+- [Planejamento do backend](planejamento/sprint-03-backend.md): escopo, critérios de aceite, dependências e validação.
