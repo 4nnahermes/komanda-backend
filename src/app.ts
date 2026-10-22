@@ -9,6 +9,7 @@ import { tratarErros } from "./interfaces/http/tratar-erros";
 import { dependenciasProdutosTypeorm, montarRotasProdutos } from "./main/produtos";
 import { consultaCardapioTypeorm, montarRotasCardapio } from "./main/cardapio";
 import { dependenciasBairrosTypeorm, montarRotasBairros } from "./main/bairros";
+import { dependenciasMotoboysTypeorm, montarRotasMotoboys } from "./main/motoboys";
 
 export const app = express();
 
@@ -29,6 +30,8 @@ app.use("/api/cardapio", montarRotasCardapio(consultaCardapioTypeorm(AppDataSour
 
 // US06 — Cadastro de bairros e taxas de entrega
 app.use("/api/bairros", montarRotasBairros(dependenciasBairrosTypeorm(AppDataSource)));
+// Cadastro de motoboys
+app.use("/api/motoboys", montarRotasMotoboys(dependenciasMotoboysTypeorm(AppDataSource)));
 
 // Tratamento de erros: sempre o último middleware registrado.
 app.use(tratarErros);
