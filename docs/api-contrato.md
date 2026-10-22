@@ -1,7 +1,7 @@
 # Contrato da API — Komanda
 
 Sprint 2 · Responsáveis: Anna Hermes e Gabriel Lessa
-Versão 0.1 · rascunho para revisão com a dupla de frontend
+Versão 0.3
 
 ---
 
@@ -55,8 +55,6 @@ Todo erro devolve o código HTTP adequado e um corpo com a mensagem, pronta para
 | `nome` | texto | obrigatório, 1 a 60 caracteres, único (sem diferenciar maiúsculas) |
 | `ordem` | número | posição no cardápio, começando em 1 |
 | `ativo` | booleano | `true` ao criar |
-
-> Os ingredientes padrão da categoria (Requisito 3) entram quando o cadastro de ingredientes existir. Até lá, a categoria não tem esse campo.
 
 ### `GET /api/categorias`
 
@@ -205,7 +203,9 @@ Define a ordem de todas as categorias de uma vez, como fica depois de o atendent
 | `ativo` | booleano | `true` ao criar |
 | `categoria` | objeto | a categoria do produto (`id` e `nome`) |
 
-> A ficha técnica (Requisito 5) e os grupos de complementos (Requisito 6) terão rotas próprias quando forem implementados.
+> **Combos:** um combo é um produto comum, cadastrado numa categoria própria (ex.: "Combos"), com preço próprio e os itens que inclui na descrição. Não há campo nem rota específica para combos. Combos com escolha de itens ficam fora do MVP (seção 6).
+>
+> **Ingredientes removíveis e adicionais:** são grupos de complementos (Requisitos 6 e 7), com rotas próprias a detalhar (seção 5).
 
 ### `GET /api/produtos`
 
@@ -348,15 +348,12 @@ No exemplo, a categoria Bauru (ordem 2) não aparece porque ainda não tem produ
 
 Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e podem mudar, na sprint em que cada módulo for implementado.
 
-### Cardápio (complementos e ficha técnica)
+### Cardápio (complementos)
 
 | Método | Rota | Descrição | Requisito |
 |---|---|---|---|
-| GET, POST, PATCH, DELETE | `/api/ingredientes` | Cadastro de ingredientes (unidade e estoque mínimo) | R2 |
-| GET, PATCH | `/api/categorias/:id/ingredientes-padrao` | Ingredientes padrão da categoria | R3 |
-| GET, PATCH | `/api/produtos/:id/ficha-tecnica` | Ficha técnica do produto | R5 |
-| GET, POST, PATCH, DELETE | `/api/grupos-complementos` | Grupos de complementos e produtos ligados | R6 |
-| GET, POST, PATCH, DELETE | `/api/grupos-complementos/:id/complementos` | Complementos de um grupo | R7 |
+| GET, POST, PATCH, DELETE | `/api/grupos-complementos` | Grupos de complementos (ex.: "Retirar ingredientes", "Adicionais"): obrigatório ou opcional, mínimo e máximo de escolhas e produtos ligados | R6 |
+| GET, POST, PATCH, DELETE | `/api/grupos-complementos/:id/complementos` | Complementos de um grupo: nome e preço extra (R$ 0,00 quando só retira um ingrediente) | R7 |
 
 ### Pedidos
 
@@ -364,7 +361,7 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 |---|---|---|---|
 | GET | `/api/pedidos` | Lista pedidos (filtros por data e status) | R9, R18 |
 | GET | `/api/pedidos/:id` | Detalhe do pedido com itens | R9 |
-| POST | `/api/pedidos` | Cria pedido; calcula total, taxa, troco e prazo; dá baixa no estoque | R9–R17, R22, R24, RN1–RN3 |
+| POST | `/api/pedidos` | Cria pedido; calcula total, taxa, troco e prazo | R9–R17, R22, RN1, RN2 |
 | PATCH | `/api/pedidos/:id/status` | Altera o status (Em preparo, Saiu para entrega, Entregue, Cancelado) | R18 |
 | PATCH | `/api/pedidos/:id/motoboy` | Vincula o motoboy | R17 |
 | GET, PATCH | `/api/configuracoes/prazo-entrega` | Prazo médio de entrega vigente | R21 |
@@ -375,15 +372,7 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 |---|---|---|---|
 | GET, POST, PATCH, DELETE | `/api/bairros` | Bairros e taxa de entrega | R19 |
 | GET, POST, PATCH, DELETE | `/api/formas-pagamento` | Formas de pagamento | R20 |
-| GET, POST, PATCH, DELETE | `/api/motoboys` | Motoboys e valor fixo por noite | R26 |
-
-### Estoque
-
-| Método | Rota | Descrição | Requisito |
-|---|---|---|---|
-| POST | `/api/estoque/entradas` | Registra entrada de estoque | R23 |
-| GET | `/api/estoque` | Saldo atual de cada ingrediente | R25 |
-| GET | `/api/estoque/:ingredienteId/movimentos` | Histórico de entradas e saídas | R25 |
+| GET, POST, PATCH, DELETE | `/api/motoboys` | Motoboys: nome, telefone e valor fixo por noite | R26 |
 
 ### Fechamento e dashboard
 
@@ -392,7 +381,20 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 | GET | `/api/caixa/fechamento?data=` | Fechamento do dia por forma de pagamento, taxas e motoboys | R28, R29, RN6 |
 | GET | `/api/motoboys/acerto?data=` | Acerto de cada motoboy na noite | R27, RN4 |
 | GET | `/api/dashboard/metricas?inicio=&fim=` | Métricas de vendas do período | R30–R32, RN6 |
-| GET | `/api/dashboard/alertas-estoque` | Ingredientes abaixo ou perto do mínimo | R33 |
+
+---
+
+## 6. Fora do MVP
+
+Decisões da equipe para caber no prazo. Ficam registradas para uma versão futura.
+
+| Item | Requisitos | Motivo |
+|---|---|---|
+| Controle de estoque: cadastro de ingredientes, ficha técnica, entradas, baixa automática por pedido, saldo e alertas no dashboard | R2, R5, R23–R25, R33, RN3 | Módulo extenso; o MVP prioriza cardápio, pedidos e fechamento de caixa |
+| Ingredientes padrão da categoria | R3 | Dependia do cadastro de ingredientes |
+| Estoque por produto | — | Proposto nas telas; o controle de estoque como um todo ficou fora do MVP |
+| Combos com escolha de itens (ex.: "escolha a bebida") | — | Não está no levantamento; os combos do MVP são fixos (seção 3) |
+| Imagem do produto | — | Não está no levantamento; usar fotos próprias exigiria envio e armazenamento de arquivos |
 
 ---
 
@@ -401,6 +403,7 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 1. **Ordenar categorias:** o frontend envia a lista inteira de `ids` em `PATCH /api/categorias/ordem`. Isso funciona tanto para arrastar e soltar quanto para botões de subir e descer.
 2. **Excluir ou desativar:** as telas de categorias e produtos têm as duas ações. Quando a exclusão for bloqueada (409), a tela mostra a mensagem, que já sugere desativar.
 3. **Mensagens de erro:** o frontend pode mostrar o campo `erro` direto para o atendente.
+4. **Nomes dos campos:** o frontend passa a usar os nomes do contrato (`nome`, `preco`, `descricao`, `categoria`, `ativo`) em vez de `name`, `price`, `desc`, `catId` e `active`.
 
 ## Histórico
 
@@ -408,4 +411,4 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 |---|---|---|
 | 0.1 | 06/10/2026 | Primeira versão: convenções, categorias, produtos e cardápio detalhados; demais rotas listadas |
 | 0.2 | 06/10/2026 | Edição passa a ser só por `PATCH` (o status `ativo` vai no mesmo `PATCH`); incluída a exclusão com `DELETE` em categorias, produtos e demais cadastros |
-| 0.3 | 07/10/2026 | Produtos: mensagens de erro de tamanho, tipo e casas decimais; erros dos filtros da listagem; `descricao: null` no `PATCH` |
+| 0.3 | 21/10/2026 | Produtos: mensagens de erro de tamanho, tipo e casas decimais, erros dos filtros da listagem e `descricao: null` no `PATCH`. Alinhamento com as telas: combos como produtos comuns; complementos para ingredientes removíveis e adicionais; telefone do motoboy; estoque, ficha técnica e imagem do produto fora do MVP (nova seção 6) |
