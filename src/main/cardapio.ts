@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { DataSource } from "typeorm";
+import { PrismaClient } from "@prisma/client";
 import { ConsultaCardapio } from "../aplicacao/cardapio/cardapio/consulta-cardapio";
 import { ConsultarCardapio } from "../aplicacao/cardapio/cardapio/consultar-cardapio";
-import { ConsultaCardapioTypeorm } from "../infraestrutura/typeorm/cardapio/consulta-cardapio-typeorm";
+import { ConsultaCardapioPrisma } from "../infraestrutura/prisma/cardapio/consulta-cardapio-prisma";
 import { CardapioController } from "../interfaces/http/cardapio/cardapio-controller";
 import { cardapioRotas } from "../interfaces/http/cardapio/cardapio-rotas";
 
@@ -12,6 +12,6 @@ export function montarRotasCardapio(consulta: ConsultaCardapio): Router {
     return cardapioRotas(new CardapioController(new ConsultarCardapio(consulta)));
 }
 
-export function consultaCardapioTypeorm(dataSource: DataSource): ConsultaCardapio {
-    return new ConsultaCardapioTypeorm(dataSource);
+export function consultaCardapioPrisma(prisma: PrismaClient): ConsultaCardapio {
+    return new ConsultaCardapioPrisma(prisma);
 }

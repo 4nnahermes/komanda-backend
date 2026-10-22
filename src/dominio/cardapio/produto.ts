@@ -201,6 +201,9 @@ function normalizarDescricao(valor: string | null): string | null {
 }
 
 function validarPreco(valor: number): Dinheiro {
+    if (valor > 99999999.99) {
+        throw new ErroDeValidacao("O preço deve ser no máximo R$ 99.999.999,99");
+    }
     if (!Dinheiro.ehValorEmReaisValido(valor)) {
         throw new ErroDeValidacao("O preço deve ter no máximo 2 casas decimais");
     }

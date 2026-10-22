@@ -10,7 +10,7 @@ const nome = z.string({ error: "O nome do produto é obrigatório" });
 const preco = z.number({
     error: (problema) =>
         problema.input === undefined ? "O preço do produto é obrigatório" : "O preço deve ser um número",
-});
+}).max(99999999.99, { error: "O preço deve ser no máximo R$ 99.999.999,99" });
 
 const categoriaId = z
     .number({ error: "Informe a categoria do produto" })

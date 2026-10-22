@@ -27,7 +27,7 @@ Nomes normalizados em campos próprios com índices únicos; produtos têm chave
 4. Trocar a composição do app e conexão por um Prisma Client reutilizável, inicialização concorrente com retry e health MongoDB. Manter default export para Vercel e execução local.
 5. Remover dependências TypeORM/pg, entidades/decorators/migrations SQL e referências operacionais antigas; atualizar scripts, `.env.example`, Node, documentação e testes. A história Git preserva a implementação anterior.
 6. Verificar esquema/generate, typecheck, build, testes existentes e novos testes de persistência contra replica set MongoDB local descartável. Conferir HTTP real, índices, moeda máxima, PATCH, filtros, ordenação e concorrência.
-7. Publicar a cópia própria e o PR da migração, com as verificações e limitações documentadas. Não publicar backend na Vercel nem conectar ao Atlas sem a configuração posterior.
+7. Publicar a versão inicial adaptada no novo repositório próprio, com as verificações e limitações documentadas. Preparar a importação na Vercel e chamar o usuário quando for inserir a conexão do Atlas. A publicação efetiva e a preparação do banco remoto dependem dessa configuração posterior.
 
 ## Operação e dados
 

@@ -5,6 +5,12 @@ import { ErroDeValidacao } from "../../../src/dominio/compartilhado/erros";
 const valido = { nome: "Xis Carne", preco: 32.9, categoriaId: 1 };
 
 describe("Produto", () => {
+    it("preserva o teto monetário anterior ao criar e alterar", () => {
+        const produto = Produto.criar({ ...valido, preco: 99999999.99 });
+        expect(produto.preco.centavos).toBe(9999999999);
+        expect(() => Produto.criar({ ...valido, preco: 100000000 })).toThrow("O preço deve ser no máximo R$ 99.999.999,99");
+        expect(() => produto.alterarPreco(100000000)).toThrow("O preço deve ser no máximo R$ 99.999.999,99");
+    });
     it("nasce ativo, com nome sem espaços nas pontas e preço em centavos", () => {
         const produto = Produto.criar({ ...valido, nome: "  Xis Carne  " });
         expect(produto.nome).toBe("Xis Carne");

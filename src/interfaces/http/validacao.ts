@@ -14,7 +14,7 @@ export function validarCorpo<T extends z.ZodType>(esquema: T, corpo: unknown): z
 // Um id que não é inteiro positivo não existe no banco, então a resposta é 404.
 export function lerId(valor: unknown, mensagemNaoEncontrado: string): number {
     const id = Number(valor);
-    if (!Number.isInteger(id) || id <= 0) {
+    if (!Number.isInteger(id) || id <= 0 || id > 2147483647) {
         throw new RecursoNaoEncontrado(mensagemNaoEncontrado);
     }
     return id;
@@ -32,7 +32,7 @@ export function lerFiltroBooleano(valor: unknown, nomeDoFiltro: string): boolean
 export function lerFiltroId(valor: unknown, nomeDoFiltro: string): number | undefined {
     if (valor === undefined) return undefined;
     const id = Number(valor);
-    if (typeof valor !== "string" || !Number.isInteger(id) || id <= 0) {
+    if (typeof valor !== "string" || !Number.isInteger(id) || id <= 0 || id > 2147483647) {
         throw new ErroDeValidacao(`O filtro ${nomeDoFiltro} deve ser um número inteiro maior que zero`);
     }
     return id;

@@ -1,55 +1,17 @@
-# Modelo de dados inicial
+# Modelo de dados — MongoDB
 
-Sprint 1 · Item 4 · Responsável: Lucas Sol, com apoio de Anna Hermes
+O schema executável é `prisma/schema.prisma`. Esta cópia substitui PostgreSQL/TypeORM por MongoDB/Prisma sem alterar as respostas da API.
 
-Ponto de partida tirado do levantamento de requisitos. Nomes e campos ainda podem mudar. Quando as entidades forem criadas em `src/entity/`, as tabelas passam a ser geradas pelas migrations.
+| Coleção | Conteúdo | Índices relevantes |
+|---|---|---|
+| categorias | `_id` inteiro, nome, nomeNormalizado, ordem, ativo | nomeNormalizado único; ordem/id |
+| produtos | `_id` inteiro, nome, nomeNormalizado, descricao opcional, precoCentavos Long, categoriaId inteiro, ativo, ingredientes e adicionais embutidos | categoriaId/nomeNormalizado único; ativo/categoriaId |
+| bairros | `_id` inteiro, nome, nomeNormalizado, taxaEntregaCentavos Long, ativo | nomeNormalizado único; nome/id |
+| motoboys | `_id` inteiro, nome, nomeNormalizado, telefone opcional, valorFixoNoiteCentavos Long, ativo | nomeNormalizado único; nome/id |
+| contadores | `_id` textual, valor inteiro | chave primária |
 
-**Banco escolhido:** PostgreSQL (justificativa em [stack-backend.md](stack-backend.md)).
+Os IDs públicos continuam inteiros positivos de 32 bits. O contador por coleção é incrementado na mesma transação da criação; rollback não consome o valor da transação abortada. Uma chave adicional `lock:catalogo` serializa escritas relacionadas no catálogo. Nomes normalizados são aparados e convertidos para minúsculas em pt-BR; acentos não são removidos.
 
-```mermaid
-erDiagram
-    CATEGORIA ||--o{ PRODUTO : agrupa
-    CATEGORIA }o--o{ INGREDIENTE : "ingredientes padrão"
-    PRODUTO ||--o{ FICHA_TECNICA : tem
-    INGREDIENTE ||--o{ FICHA_TECNICA : usado_em
-    PRODUTO }o--o{ GRUPO_COMPLEMENTOS : oferece
-    GRUPO_COMPLEMENTOS ||--|{ COMPLEMENTO : contem
-    INGREDIENTE ||--o{ COMPLEMENTO : movimenta
-    INGREDIENTE ||--o{ MOVIMENTO_ESTOQUE : movimenta
-    PEDIDO ||--|{ ITEM_PEDIDO : contem
-    PRODUTO ||--o{ ITEM_PEDIDO : vendido_em
-    ITEM_PEDIDO }o--o{ COMPLEMENTO : escolhe
-    BAIRRO ||--o{ PEDIDO : entrega_em
-    FORMA_PAGAMENTO ||--o{ PEDIDO : paga
-    MOTOBOY ||--o{ PEDIDO : entrega
-```
+Dinheiro é armazenado em centavos inteiros de 64 bits (Prisma BigInt/BSON long), inclusive nos adicionais. A conversão para número em reais ocorre na saída e preserva o intervalo existente de até R$ 99.999.999,99. O JSON público nunca contém BigInt nem campos internos como nomeNormalizado.
 
-| Entidade | Campos principais |
-|---|---|
-| Categoria | nome, ordem, ingredientes padrão, ativo |
-| Ingrediente | nome, unidade (un ou kg), saldo atual, estoque mínimo |
-| Produto | nome, categoria, descrição, preço, ativo |
-| Ficha técnica | produto, ingrediente, quantidade média, unidade de medida (un, g ou kg) |
-| Grupo de complementos | nome, obrigatório, mínimo, máximo, produtos ligados |
-| Complemento | grupo, nome, preço extra, ingrediente, quantidade (soma ou desconta do estoque) |
-| Movimento de estoque | ingrediente, tipo (entrada ou saída), quantidade, data, pedido de origem |
-| Pedido | data e hora, tipo (entrega ou retirada), endereço, bairro, taxa, forma de pagamento, valor recebido e troco, motoboy, status, prazo estimado, total |
-| Item do pedido | pedido, produto, quantidade, preço unitário gravado, complementos escolhidos, subtotal |
-| Bairro | nome, taxa de entrega |
-| Forma de pagamento | nome, ativo |
-| Motoboy | nome, valor fixo por noite |
-
-## Módulos do MVP cobertos
-
-| Módulo | Entidades |
-|---|---|
-| Cardápio | Categoria, Grupo de complementos, Complemento |
-| Produtos | Produto, Ficha técnica |
-| Vendas | Pedido, Item do pedido, Bairro, Forma de pagamento, Motoboy |
-| Estoque | Ingrediente, Movimento de estoque |
-
-## Pontos para decidir com a equipe
-
-- O **pedido grava uma cópia da taxa do bairro e do preço de cada item** (RN5), para que os relatórios antigos não mudem se os valores forem alterados depois.
-- O **saldo do ingrediente** pode ser uma coluna atualizada a cada movimento, ou calculado somando os movimentos. A coluna é mais simples para o alerta de estoque (R33).
-- **Unidades**: guardar o estoque sempre na unidade base do ingrediente (un ou kg) e converter g → kg na baixa (RN3).
+MongoDB não impõe foreign keys. O serviço de categorias e o repositório de produtos usam o mesmo bloqueio transacional: não é possível excluir categoria com produtos, nem criar/mover produto para categoria excluída pelo caminho da API. Alterações diretas feitas fora da API não possuem essa proteção. Transações exigem replica set. Não há coleções de pedidos, estoque ou caixa nesta entrega.

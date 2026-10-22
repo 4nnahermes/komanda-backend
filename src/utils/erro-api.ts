@@ -1,4 +1,5 @@
 import { Response } from "express";
+import { registrarErro } from "./registrar-erro";
 
 // Erro de regra de negócio com o código HTTP que a API deve devolver.
 // O service lança, o controller transforma em { "erro": "mensagem" }.
@@ -13,6 +14,6 @@ export function responderErro(res: Response, erro: unknown) {
         res.status(erro.status).json({ erro: erro.message });
         return;
     }
-    console.error(erro);
+    registrarErro(erro);
     res.status(500).json({ erro: "Erro inesperado no servidor" });
 }

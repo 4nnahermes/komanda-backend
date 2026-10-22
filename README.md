@@ -1,140 +1,50 @@
-# Komanda — Backend
+# Komanda Backend — Prisma e MongoDB Atlas
 
-API do Komanda, sistema de gestão para lancheria com delivery: cardápio, pedidos com cálculo automático, estoque de insumos, acerto dos motoboys, fechamento de caixa e dashboard do gestor.
+API Node.js/TypeScript/Express para o Komanda, com persistência Prisma/MongoDB. Derivada de [4nnahermes/komanda-backend](https://github.com/4nnahermes/komanda-backend), preservando autores e histórico; esta cópia é mantida em [GabrielLTM/komanda-backend](https://github.com/GabrielLTM/komanda-backend). A versão PostgreSQL original não é alterada.
 
-Projeto de Desenvolvimento 1 · UniSenac · 2026-2
-Equipe: Anna Hermes, Diego Silva, Gabriel Lessa e Lucas Sol
+## Rodar
 
-## Stack
+Use Node.js 24. Copie `.env.example` para `.env` e configure `DATABASE_URL` com a URI MongoDB que inclui o nome do banco. A conexão do Atlas fica somente no backend, nunca no frontend ou em commits.
 
-- Node.js + TypeScript
-- Express 5
-- TypeORM
-- PostgreSQL
-
-A justificativa da escolha está em [docs/stack-backend.md](docs/stack-backend.md).
-
-## Pré-requisitos
-
-| Ferramenta | Versão | Como conferir |
-|---|---|---|
-| Node.js | 20 LTS ou mais recente | `node -v` |
-| PostgreSQL | 14 ou mais recente (só para banco local) | pgAdmin aberto ou `psql --version` |
-| Git | qualquer recente | `git --version` |
-
-Editor recomendado: VS Code.
-
-## Como rodar
-
-**1. Clonar o repositório**
-
-```bash
-git clone https://github.com/4nnahermes/komanda-backend.git
-cd komanda-backend
-```
-
-**2. Instalar as dependências**
-
-```bash
-npm install
-```
-
-**3. Configurar o `.env`**
-
-Copie o arquivo de exemplo:
-
-```bash
-# Windows (PowerShell)
-copy .env.example .env
-
-# Mac / Linux
-cp .env.example .env
-```
-
-O `.env` fica só na sua máquina e não vai para o GitHub. Escolha uma das opções de banco:
-
-**Opção A — banco online da equipe:** cole em `DATABASE_URL` a connection string que a equipe compartilhou por mensagem privada. Não precisa instalar o PostgreSQL.
-
-**Opção B — banco local:** deixe `DATABASE_URL` vazio, crie um banco vazio chamado `komanda` no pgAdmin (ou no `psql`) e preencha a senha do **seu** PostgreSQL em `DB_PASSWORD`:
-
-```sql
-CREATE DATABASE komanda;
-```
-
-**4. Criar as tabelas**
-
-```bash
-npm run migration:run
-```
-
-**5. Subir a API**
-
-```bash
+```sh
+npm ci
+npm run db:validate
+npm run db:push
 npm run dev
 ```
 
-O terminal deve mostrar:
+`npm ci` gera o Prisma Client. `db:push` configura coleções/índices no banco indicado: execute conscientemente no ambiente correto. Não há Prisma Migrate para este conector, nem migrations SQL. Não use reset ou `--accept-data-loss` em produção. Subir a API e fazer build não alteram schema/índices e não inserem dados demonstrativos.
 
-```
-Komanda API rodando em http://localhost:3000
-Verificação: http://localhost:3000/health
-```
+MongoDB precisa de replica set para transações. Atlas já oferece replica set; para desenvolvimento local consulte [PUBLICACAO.md](docs/PUBLICACAO.md). `/health` responde 200 quando API e MongoDB estão acessíveis e 503 se o banco não está disponível.
 
-**6. Testar**
+## Contratos preservados
 
-Abra http://localhost:3000/health no navegador (ou no Postman/Insomnia). A resposta esperada é:
-
-```json
-{ "status": "ok", "banco": "conectado", "horario": "..." }
-```
-
-## Scripts
-
-| Comando | O que faz |
+| Recurso | Rota |
 |---|---|
-| `npm run dev` | Sobe a API em modo desenvolvimento (reinicia ao salvar) |
-| `npm run build` | Compila o TypeScript para `dist/` |
-| `npm start` | Roda a versão compilada |
-| `npm test` | Roda os testes automatizados |
-| `npm run typecheck` | Confere os tipos do código e dos testes |
-| `npm run migration:generate -- src/migrations/NomeDaMigration` | Gera uma migration a partir das mudanças nas entidades |
-| `npm run migration:run` | Aplica as migrations pendentes no banco |
-| `npm run migration:revert` | Desfaz a última migration |
-| `npm run migration:run:compiled` | Compila e aplica migrations com o TypeORM CLI sobre `dist/data-source.js` |
-| `npm run migration:revert:compiled` | Compila e desfaz a última migration com a versão compilada |
-| `npm run migration:show:compiled` | Compila e lista o estado das migrations no banco |
+| Categorias e ordenação | `/api/categorias` |
+| Produtos, ingredientes e adicionais | `/api/produtos` |
+| Cardápio ativo por categoria | `/api/cardapio` |
+| Bairros e taxas | `/api/bairros` |
+| Motoboys e valor fixo por noite | `/api/motoboys` |
 
-## Publicar na Vercel com Supabase
+A API mantém IDs inteiros positivos e valores monetários em reais. No MongoDB, contadores atômicos atribuem IDs e dinheiro é guardado como inteiros de 64 bits em centavos. O frontend não precisa conhecer o modelo interno. Consulte [api-contrato.md](docs/api-contrato.md), [modelo-dados.md](docs/modelo-dados.md) e o [plano da migração](docs/planejamento/prisma-mongodb.md).
 
-O Express pode ser servido pela Vercel usando o default export de [src/app.ts](src/app.ts). O pool PostgreSQL é mantido no `DataSource` da instância Node e inicializado antes de cada pedido; em Supabase, use a conexão serverless apropriada e não exponha `DATABASE_URL` ao frontend. Consulte o [procedimento Vercel + Supabase](docs/contratos/alinhamento-frontend.md#publicação-do-backend) antes de configurar o ambiente. Migrations são uma etapa manual e explícita, separada do build e do deploy.
+Pedidos, estoque, caixa e acertos ainda não têm persistência implementada nesta API. Esta migração troca a persistência dos módulos existentes e não importa dados do PostgreSQL/Supabase.
 
-## Estrutura
+## Verificar
 
-O backend segue a arquitetura limpa. A explicação das camadas, o caminho de uma requisição e o passo a passo para criar um módulo estão em [docs/arquitetura.md](docs/arquitetura.md).
-
-```
-src/
-  server.ts         ponto de entrada: conecta no banco e sobe a API
-  app.ts            configuração do Express e registro das rotas
-  data-source.ts    conexão com o PostgreSQL (lê o .env)
-  dominio/          regras de negócio puras
-  aplicacao/        casos de uso
-  infraestrutura/   repositórios e consultas com TypeORM
-  interfaces/http/  rotas, controllers, validação e tratamento de erros
-  main/             montagem dos módulos
-  entity/           modelos de tabela do TypeORM
-  migrations/       migrations versionadas do banco
-test/               testes automatizados, espelhando src/
-docs/               documentação do projeto
+```sh
+npm test
+npm run typecheck
+npm run build
 ```
 
-## Problemas comuns
+O teste de integração usa somente MongoDB local descartável com banco cujo nome começa com `komanda_test_`. Consulte `docs/PUBLICACAO.md` para o roteiro reproduzível. Testes unitários não exigem Atlas ou credenciais.
 
-- **"Não foi possível conectar ao banco"**: confira se o PostgreSQL está rodando, se o banco `komanda` existe e se a senha no `.env` está certa.
-- **Banco online não conecta**: confira se a `DATABASE_URL` foi colada inteira, sem espaços nem aspas.
-- **Porta 3000 ocupada**: troque `PORT` no `.env`.
-- **`password authentication failed`**: a senha em `DB_PASSWORD` não é a do seu usuário `postgres`.
+## Publicação
 
-## Validação do README
+[Guia Vercel + Atlas](docs/PUBLICACAO.md). O app Express tem default export em `src/app.ts`, Prisma Client reutilizável e inicialização compartilhada por instância. Configure a conexão no painel da Vercel e os índices antes de habilitar o uso dos cadastros. A URL pública do backend com `/api` no fim será o `VITE_API_URL` do frontend.
 
-- [ ] Validado por: ____________ (integrante de fora da dupla de backend) em __/__/2026
+## Origem e autoria
+
+O histórico original e os créditos de Anna Hermes, Diego Silva, Gabriel Lessa e Lucas Sol são preservados. A migração Prisma/MongoDB é desenvolvida nesta cópia. A licença ISC declarada no projeto original foi mantida. Documentos anteriores de planejamento e validação foram movidos para `docs/historico/` e não são instruções de operação desta versão.

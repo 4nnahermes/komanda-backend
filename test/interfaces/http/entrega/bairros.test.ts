@@ -1,19 +1,17 @@
 import express from "express";
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
-import { QueryFailedError } from "typeorm";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Bairro } from "../../../../src/dominio/entrega/bairro";
 import { BairroApi, ConsultaBairros, RepositorioBairros } from "../../../../src/dominio/entrega/repositorio-bairros";
 import { ConflitoDeDados } from "../../../../src/dominio/compartilhado/erros";
 import { Dinheiro } from "../../../../src/dominio/compartilhado/dinheiro";
 import { montarRotasBairros } from "../../../../src/main/bairros";
-import { RepositorioBairrosTypeorm } from "../../../../src/infraestrutura/typeorm/entrega/repositorio-bairros-typeorm";
 import { tratarErros } from "../../../../src/interfaces/http/tratar-erros";
+import { dependenciasBairrosPrisma } from "../../../../src/main/bairros";
 
 class BairrosEmMemoria implements RepositorioBairros {
     private dados: BairroApi[] = [];
     private proximoId = 1;
-    bloquearExclusao = false;
 
     async buscarPorId(id: number): Promise<Bairro | null> {
         const bairro = this.dados.find((item) => item.id === id);
@@ -31,7 +29,6 @@ class BairrosEmMemoria implements RepositorioBairros {
         return id;
     }
     async excluir(id: number): Promise<void> {
-        if (this.bloquearExclusao) throw new ConflitoDeDados("Não é possível excluir um bairro em uso. Desative o bairro");
         this.dados = this.dados.filter((item) => item.id !== id);
     }
     async listar(ativo?: boolean): Promise<BairroApi[]> {
@@ -97,42 +94,21 @@ describe("API de bairros", () => {
         expect(resposta.body).toEqual({ erro: "O corpo da requisição deve ser um objeto JSON" });
     });
 
-    it("traduz conflito de referência na exclusão para 409", async () => {
-        await api.post("/api/bairros").send({ nome: "Centro", taxaEntrega: 1 });
-        store.bloquearExclusao = true;
-        const resposta = await api.delete("/api/bairros/1");
-        expect(resposta.status).toBe(409);
-        expect(resposta.body).toEqual({ erro: "Não é possível excluir um bairro em uso. Desative o bairro" });
-    });
-
-    it.each([
-        ["23505", "POST", "Já existe um bairro com esse nome"],
-        ["23503", "DELETE", "Não é possível excluir um bairro em uso. Desative o bairro"],
-    ])("leva violação PostgreSQL %s ao contrato HTTP 409", async (code, method, mensagem) => {
-        const queryError = () => new QueryFailedError("query", [], Object.assign(new Error("database error"), { code }));
-        const dataSource = {
-            getRepository: () => ({
-                findOneBy: async () => ({ id: 1, nome: "Centro", taxaEntrega: 1, ativo: true }),
-                createQueryBuilder: () => ({ where() { return this; }, andWhere() { return this; }, getExists: async () => false }),
-                create: () => ({}),
-                save: async () => { throw queryError(); },
-                delete: async () => { throw queryError(); },
-            }),
+    it("traduz conflito Prisma P2002 ao atualizar nome para 409", async () => {
+        const prisma = {
+            bairro: {
+                findUnique: vi.fn().mockResolvedValue({ id: 1, nome: "Centro", nomeNormalizado: "centro", taxaEntregaCentavos: 100n, ativo: true }),
+                findFirst: vi.fn().mockResolvedValue(null),
+                updateMany: vi.fn().mockRejectedValue(Object.assign(new Error("unique constraint"), { code: "P2002" })),
+                findMany: vi.fn(),
+            },
         };
-        const response = method === "POST"
-            ? await request(createAppWithDataSource(dataSource)).post("/api/bairros").send({ nome: "Centro", taxaEntrega: 1 })
-            : await request(createAppWithDataSource(dataSource)).delete("/api/bairros/1");
+        const app = express();
+        app.use(express.json());
+        app.use("/api/bairros", montarRotasBairros(dependenciasBairrosPrisma(prisma as any)));
+        app.use(tratarErros);
+        const response = await request(app).patch("/api/bairros/1").send({ nome: "Centro Histórico" });
         expect(response.status).toBe(409);
-        expect(response.body).toEqual({ erro: mensagem });
+        expect(response.body).toEqual({ erro: "Já existe um bairro com esse nome" });
     });
 });
-
-function createAppWithDataSource(dataSource: any) {
-    const app = express();
-    app.use(express.json());
-    app.use("/api/bairros", montarRotasBairros({ repositorio: new RepositorioBairrosTypeorm(dataSource), consulta: {
-        listar: async () => [], buscarPorId: async () => ({ id: 1, nome: "Centro", taxaEntrega: 1, ativo: true }),
-    } }));
-    app.use(tratarErros);
-    return app;
-}

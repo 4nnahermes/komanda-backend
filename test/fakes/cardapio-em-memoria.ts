@@ -12,7 +12,7 @@ export interface CategoriaEmMemoria {
 }
 
 // Substitui o banco nos testes. Guarda categorias e produtos em memória
-// e oferece as mesmas interfaces que as implementações com TypeORM.
+// e oferece as mesmas interfaces que as implementações de persistência.
 export class CardapioEmMemoria {
     readonly categorias: CategoriaEmMemoria[] = [];
     readonly produtos = new Map<number, Produto>();
