@@ -17,6 +17,15 @@ describePostgres("repositório TypeORM de categorias (PostgreSQL descartável)",
     let repositorio: RepositorioCategoriasTypeorm;
 
     beforeAll(async () => {
+        const endereco = new URL(url!);
+        const banco = decodeURIComponent(endereco.pathname.slice(1));
+        if (!new Set(["localhost", "127.0.0.1", "::1"]).has(endereco.hostname)) {
+            throw new Error("CATEGORIAS_TEST_DATABASE_URL deve apontar para PostgreSQL local descartável");
+        }
+        if (banco !== "komanda_review" && !banco.startsWith("komanda_test")) {
+            throw new Error("CATEGORIAS_TEST_DATABASE_URL deve usar o banco komanda_review ou komanda_test*");
+        }
+
         admin = new DataSource({ type: "postgres", url, synchronize: false, entities: [] });
         await admin.initialize();
         await admin.query(`CREATE SCHEMA "${schema}"`);
@@ -27,7 +36,12 @@ describePostgres("repositório TypeORM de categorias (PostgreSQL descartável)",
         });
         await dataSource.initialize();
         const migracao = new UnicidadeCategorias1792620002000();
-        await migracao.up(dataSource.createQueryRunner());
+        const queryRunner = dataSource.createQueryRunner();
+        try {
+            await migracao.up(queryRunner);
+        } finally {
+            await queryRunner.release();
+        }
         repositorio = new RepositorioCategoriasTypeorm(dataSource);
     }, 30000);
 
@@ -66,12 +80,17 @@ describePostgres("repositório TypeORM de categorias (PostgreSQL descartável)",
 
     it("recusa a migration quando os dados legados já têm nomes duplicados", async () => {
         const queryRunner = dataSource.createQueryRunner();
-        await queryRunner.query(`DROP INDEX "${schema}"."uq_categoria_nome_lower"`);
-        await queryRunner.query(`INSERT INTO "${schema}"."categoria" (nome, ordem, ativo) VALUES ('Bauru', 1, true), ('bauru', 2, true)`);
-        await expect(new UnicidadeCategorias1792620002000().up(queryRunner)).rejects.toThrow(/nomes duplicados legados.*Bauru, bauru/);
-        await queryRunner.query(`DELETE FROM "${schema}"."categoria"`);
-        await new UnicidadeCategorias1792620002000().up(queryRunner);
-        await queryRunner.release();
+        try {
+            await queryRunner.query(`DROP INDEX "${schema}"."uq_categoria_nome_lower"`);
+            await queryRunner.query(`CREATE UNIQUE INDEX "uq_categoria_nome_case_sensitive_legacy" ON "${schema}"."categoria" ("nome")`);
+            await queryRunner.query(`INSERT INTO "${schema}"."categoria" (nome, ordem, ativo) VALUES ('Legado', 1, true), ('legado', 2, true)`);
+            await expect(new UnicidadeCategorias1792620002000().up(queryRunner)).rejects.toThrow(/nomes duplicados legados.*Legado, legado/);
+            await queryRunner.query(`DELETE FROM "${schema}"."categoria"`);
+            await queryRunner.query(`DROP INDEX "${schema}"."uq_categoria_nome_case_sensitive_legacy"`);
+            await new UnicidadeCategorias1792620002000().up(queryRunner);
+        } finally {
+            await queryRunner.release();
+        }
     });
 
     it("mantém 409 se a chave estrangeira proteger uma exclusão concorrente", async () => {
