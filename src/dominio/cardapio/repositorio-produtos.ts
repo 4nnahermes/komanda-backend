@@ -1,4 +1,4 @@
-import { Produto } from "./produto";
+import { AlteracoesProduto, Produto } from "./produto";
 
 // O que os casos de uso precisam para gravar produtos.
 // A implementação com TypeORM fica em src/infraestrutura.
@@ -10,6 +10,8 @@ export interface RepositorioProdutos {
 
     // Insere quando o produto ainda não tem id; atualiza quando já tem. Devolve o id.
     salvar(produto: Produto): Promise<number>;
+
+    atualizarCampos(id: number, campos: AlteracoesProduto): Promise<boolean>;
 
     excluir(id: number): Promise<void>;
 }

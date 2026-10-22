@@ -41,6 +41,8 @@ describe("API de produtos", () => {
             preco: 36.5,
             ativo: true,
             categoria: { id: 1, nome: "Xis" },
+            ingredientes: [],
+            adicionais: [],
         });
     });
 
@@ -53,10 +55,33 @@ describe("API de produtos", () => {
         [{ nome: "Xis", preco: 10 }, "Informe a categoria do produto"],
         [{ nome: "Xis", categoriaId: 99, preco: 10 }, "Categoria não encontrada"],
         [{ nome: "Xis", categoriaId: 1, preco: 10, descricao: 5 }, "A descrição deve ser um texto"],
+        [{ nome: "Xis", categoriaId: 1, preco: 10, ingredientes: [" cebola ", "cebola"] }, "Os ingredientes não podem se repetir"],
+        [{ nome: "Xis", categoriaId: 1, preco: 10, ingredientes: ["  "] }, "Cada ingrediente deve ter de 1 a 120 caracteres"],
+        [{ nome: "Xis", categoriaId: 1, preco: 10, adicionais: [{ nome: "Queijo", preco: 4.1 }, { nome: " QUEIJO ", preco: 0 }] }, "Os nomes dos adicionais não podem se repetir"],
+        [{ nome: "Xis", categoriaId: 1, preco: 10, adicionais: [{ nome: "Queijo", preco: 4.123 }] }, "O preço do adicional deve ter até 2 casas decimais"],
     ])("POST com %j responde 400: %s", async (corpo, mensagem) => {
         const resposta = await api.post("/api/produtos").send(corpo);
         expect(resposta.status).toBe(400);
         expect(resposta.body).toEqual({ erro: mensagem });
+    });
+
+    it("POST salva ingredientes e extras usando o contrato string-lista e nome/preço", async () => {
+        const resposta = await api.post("/api/produtos").send({
+            nome: "Xis Especial", categoriaId: 1, preco: 36.5,
+            ingredientes: ["cebola", "tomate"], adicionais: [{ nome: "Queijo extra", preco: 4.1 }, { nome: "Bacon", preco: 0 }],
+        });
+        expect(resposta.status).toBe(201);
+        expect(resposta.body).toMatchObject({
+            ingredientes: ["cebola", "tomate"],
+            adicionais: [{ nome: "Queijo extra", preco: 4.1 }, { nome: "Bacon", preco: 0 }],
+        });
+    });
+
+    it("PATCH limpa arrays sem modificar campos omitidos", async () => {
+        await api.post("/api/produtos").send({ nome: "Xis Carne", categoriaId: 1, preco: 32.9, ingredientes: ["cebola"], adicionais: [{ nome: "Queijo", preco: 4.1 }] });
+        const resposta = await api.patch("/api/produtos/1").send({ ingredientes: [], adicionais: [] });
+        expect(resposta.status).toBe(200);
+        expect(resposta.body).toMatchObject({ nome: "Xis Carne", preco: 32.9, ingredientes: [], adicionais: [] });
     });
 
     it("POST com nome repetido na categoria responde 409", async () => {

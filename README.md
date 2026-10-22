@@ -100,6 +100,13 @@ Abra http://localhost:3000/health no navegador (ou no Postman/Insomnia). A respo
 | `npm run migration:generate -- src/migrations/NomeDaMigration` | Gera uma migration a partir das mudanças nas entidades |
 | `npm run migration:run` | Aplica as migrations pendentes no banco |
 | `npm run migration:revert` | Desfaz a última migration |
+| `npm run migration:run:compiled` | Compila e aplica migrations com o TypeORM CLI sobre `dist/data-source.js` |
+| `npm run migration:revert:compiled` | Compila e desfaz a última migration com a versão compilada |
+| `npm run migration:show:compiled` | Compila e lista o estado das migrations no banco |
+
+## Publicar na Vercel com Supabase
+
+O Express pode ser servido pela Vercel usando o default export de [src/app.ts](src/app.ts). O pool PostgreSQL é mantido no `DataSource` da instância Node e inicializado antes de cada pedido; em Supabase, use a conexão serverless apropriada e não exponha `DATABASE_URL` ao frontend. Consulte o [procedimento Vercel + Supabase](docs/contratos/alinhamento-frontend.md#publicação-do-backend) antes de configurar o ambiente. Migrations são uma etapa manual e explícita, separada do build e do deploy.
 
 ## Estrutura
 

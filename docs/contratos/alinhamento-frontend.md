@@ -1,35 +1,27 @@
-# Alinhamento entre API e telas — issue #25
+# Alinhamento entre a API e o frontend Mau Mau
 
-22/10/2026. Decisões técnicas propostas para integrar o catálogo básico. Confirmação da dupla de frontend e do cliente ainda pendente; este documento não fecha a issue #25.
+Fonte de referência: `projeto_mau_mau_lanches_teste`, revisão de origem `bca95c7` com os ajustes locais mantidos em `komanda-frontend`. O mapeamento abaixo descreve o contrato da fonte importada; não significa que a integração foi validada pelo cliente.
 
-## Matriz de adaptação
-
-| Tela/modelo do protótipo | Contrato backend | Ação frontend |
+| Modelo da tela | Contrato da API | Regra de integração |
 |---|---|---|
-| Categoria | id, nome, ordem, ativo | Consumir /api/categorias, PATCH /ordem com todos os ids |
-| Produto | id, nome, descricao, preco, ativo, categoria {id,nome} | Enviar categoriaId na escrita; converter o modelo local explicitamente |
-| Consulta cardápio | array de categorias com produtos ativos | Consumir GET /api/cardapio; tratar [] e falha de rede |
-| Bairro name/fee/active | nome/taxaEntrega/ativo | Converter nomes e consumir CRUD /api/bairros |
-| Motoboy name/phone | nome/telefone | Converter nomes e consumir CRUD /api/motoboys |
-| dailyFee global na tela | valorFixoNoite individual no modelo original | Não inferir R$40; confirmar global versus individual antes do acerto financeiro |
+| Categoria `{id,name,active,ordem}` | `{id,nome,ativo,ordem}` | CRUD e reordenação existentes |
+| Produto `{id,catId,name,price,desc,active,ings,extras}` | `categoria.id`, `nome`, `preco`, `descricao`, `ativo`, `ingredientes:string[]`, `adicionais:[{nome,preco}]` | converter nomes e usar valores em reais com até dois centavos |
+| Bairro `{id,name,fee,active}` | `{id,nome,taxaEntrega,ativo}` | carregar da API e converter nomes |
+| Motoboy `{id,name,phone,active}` | `{id,nome,telefone,valorFixoNoite,ativo}` | diária é individual no backend; uma diária de referência só se aplica a novos cadastros quando a interface deixar isso claro |
 
-Referência local das telas: projeto_mau_mau_lanches_teste/src/components/{CardapioAdmin,BairrosAdmin,MotoboysAdmin,NovoPedido}.jsx e src/services/api.js. São evidência do protótipo, não prova de integração publicada. O repositório oficial do frontend é independente.
+`ings` são textos que a tela pode remover ao personalizar um pedido. Não representam ficha técnica nem baixa de insumos. `extras` são nomes com preços e não movimentam estoque. As listas aceitam até 50 itens; ingredientes são textos únicos de até 120 caracteres e adicionais têm nome único sem diferenciar maiúsculas/minúsculas até 100 caracteres.
 
-## Decisões de escopo do catálogo básico
+Em `PATCH`, a API preserva campos omitidos; listas vazias apagam somente a lista correspondente. Preços de adicionais são validados e normalizados em centavos. Produto e categoria continuam aceitando payloads antigos.
 
-- **Combos**: não há endpoint ou campos de composição. Exibir um produto com nome de combo não representa composição, desconto ou baixa por componentes. Confirmar itens, preço, personalização e estoque antes de modelar.
-- **Estoque por produto**: o requisito controla ingredientes pela ficha técnica (R5/R22/R24), não saldo arbitrário no produto. Não derivar consumo da descrição ou da lista de nomes do mock. Ficha técnica precisa ids, quantidades e unidades.
-- **Imagem**: produto atual não tem imagem nem upload/storage. Não enviar esse campo esperando persistência. Definir URL versus upload, hospedagem e limites antes de expandir o contrato.
-- **Ingredientes removíveis**: a seleção por nomes do mock não substitui ids e quantidades da ficha técnica. Personalização pertence ao item de pedido e deve ajustar consumo; depende dos módulos de ingredientes/ficha técnica/pedidos. Confirmar quais ingredientes podem ser removidos e impressão do pedido.
+## Publicação do backend
 
-Essas funcionalidades não são implementadas ou aprovadas por este documento. O frontend deve adaptar o catálogo ao contrato atual e manter controles futuros identificados como indisponíveis, sem prometer salvamento de campos não suportados.
+A configuração segue os guias oficiais de [Express na Vercel](https://vercel.com/docs/frameworks/backend/express) e [conexão serverless do Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres/serverless-drivers).
 
-## Roteiro para a issue #24
+1. Conectar o repositório backend à Vercel usando o preset automático do Express. `src/app.ts` exporta a aplicação como default; a execução serverless não chama `listen`.
+2. Definir `DATABASE_URL` somente como variável secreta do projeto backend. No Supabase, obter a URI de conexão apropriada à execução serverless no painel Connect; para clientes PostgreSQL em serverless, a documentação orienta usar o pool compartilhado em modo transaction. Configurar SSL no banco.
+3. `DB_POOL_MAX` controla o máximo por instância Vercel; o padrão é `2` para limitar conexões em escala horizontal. A instância de Node reaproveita o `DataSource` e o pool durante chamadas quentes, e compartilha uma única inicialização simultânea. Uma falha de conexão libera a próxima chamada para tentar novamente.
+   As consultas do TypeORM usam parâmetros sem nome explícito para prepared statements, evitando manter statements nomeados presos a conexões de pool compartilhado em modo transaction.
+4. Para aplicar migrations, executar `npm run migration:run:compiled` a partir de um ambiente confiável com `DATABASE_URL` apontando para o banco de destino. Esse comando compila e então usa o TypeORM CLI sobre `dist/data-source.js`; não roda automaticamente em cada build nem no início de uma requisição. Para desfazer a última migration, existe `npm run migration:revert:compiled`.
+5. Fazer deploy e conferir `/health` e os cadastros depois que a migration estiver aplicada. Não configurar `DATABASE_URL` no frontend.
 
-1. Integrar GET /api/cardapio e estados carregando/vazio/erro.
-2. Conectar escrita/leitura de categorias e produtos e conferir recarregamento.
-3. Após merge dos módulos novos, conectar bairros e motoboys conforme cadastros-entrega.md.
-4. Tratar {erro}, 400/404/409 e exclusão 204, sem manter cadastro divergente no localStorage.
-5. Validar uma rota ponta a ponta antes da sessão do cliente; registrar resultados e decisões na issue.
-
-O backend já disponibiliza as rotas do cardápio. Implementar as telas ou registrar feedback real do cliente (#19) é trabalho separado e permanece pendente.
+O `DATABASE_URL` de produção ainda não foi conectado nem testado neste repositório. A validação operacional deve usar o banco descartável e, depois, a responsável pode aplicar o procedimento ao ambiente autorizado.

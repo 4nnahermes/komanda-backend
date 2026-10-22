@@ -37,8 +37,8 @@ describe("ConsultarCardapio", () => {
             nome: "Xis",
             ordem: 1,
             produtos: [
-                { id: 3, nome: "Xis Carne", descricao: null, preco: 32.9 },
-                { id: 1, nome: "Xis Coração", descricao: null, preco: 36.5 },
+                { id: 3, nome: "Xis Carne", descricao: null, preco: 32.9, ingredientes: [], adicionais: [] },
+                { id: 1, nome: "Xis Coração", descricao: null, preco: 36.5, ingredientes: [], adicionais: [] },
             ],
         });
     });

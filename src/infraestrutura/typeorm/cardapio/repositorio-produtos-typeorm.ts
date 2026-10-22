@@ -6,6 +6,7 @@ import { ConflitoDeDados } from "../../../dominio/compartilhado/erros";
 import { MENSAGENS } from "../../../aplicacao/cardapio/produtos/mensagens";
 import { Produto as ProdutoModelo } from "../../../entity/produto";
 import { ehViolacaoDeChaveEstrangeira, ehViolacaoDeUnicidade } from "../erros-postgres";
+import { AlteracoesProduto } from "../../../dominio/cardapio/produto";
 
 export class RepositorioProdutosTypeorm implements RepositorioProdutos {
     constructor(private readonly dataSource: DataSource) {}
@@ -43,6 +44,24 @@ export class RepositorioProdutosTypeorm implements RepositorioProdutos {
         }
     }
 
+    async atualizarCampos(id: number, campos: AlteracoesProduto): Promise<boolean> {
+        const valores: Record<string, unknown> = {};
+        if (campos.nome !== undefined) valores.nome = campos.nome;
+        if (campos.descricao !== undefined) valores.descricao = campos.descricao;
+        if (campos.preco !== undefined) valores.preco = campos.preco;
+        if (campos.ativo !== undefined) valores.ativo = campos.ativo;
+        if (campos.categoriaId !== undefined) valores.categoria = { id: campos.categoriaId };
+        if (campos.ingredientes !== undefined) valores.ingredientes = campos.ingredientes;
+        if (campos.adicionais !== undefined) valores.adicionais = campos.adicionais;
+        try {
+            const resultado = await this.modelos.update({ id }, valores);
+            return (resultado.affected ?? 0) > 0;
+        } catch (erro) {
+            if (ehViolacaoDeUnicidade(erro)) throw new ConflitoDeDados(MENSAGENS.nomeRepetido);
+            throw erro;
+        }
+    }
+
     async excluir(id: number): Promise<void> {
         try {
             await this.modelos.delete({ id });
@@ -65,6 +84,8 @@ function paraDominio(modelo: ProdutoModelo): Produto {
         preco: Dinheiro.deCentavos(Math.round(modelo.preco * 100)),
         categoriaId: modelo.categoria.id,
         ativo: modelo.ativo,
+        ingredientes: modelo.ingredientes ?? [],
+        adicionais: modelo.adicionais ?? [],
     });
 }
 
@@ -75,5 +96,7 @@ function paraModelo(modelo: ProdutoModelo, produto: Produto): ProdutoModelo {
     modelo.preco = produto.preco.emReais;
     modelo.ativo = produto.ativo;
     modelo.categoria = { id: produto.categoriaId } as ProdutoModelo["categoria"];
+    modelo.ingredientes = produto.ingredientes;
+    modelo.adicionais = produto.adicionais;
     return modelo;
 }
