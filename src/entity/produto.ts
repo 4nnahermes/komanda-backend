@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Categoria } from "./categoria";
 import { decimalTransformer } from "../utils/decimal-transformer";
+import { AdicionalProduto } from "../dominio/cardapio/produto";
 
 // Requisito 4: produtos do cardápio, sempre ligados a uma categoria.
 // O nome não se repete dentro da mesma categoria.
@@ -27,4 +28,10 @@ export class Produto {
     @ManyToOne(() => Categoria, (categoria) => categoria.produtos, { nullable: false, onDelete: "RESTRICT" })
     @JoinColumn({ name: "categoria_id" })
     categoria: Categoria;
+
+    @Column({ type: "jsonb", default: () => "'[]'::jsonb" })
+    ingredientes: string[];
+
+    @Column({ type: "jsonb", default: () => "'[]'::jsonb" })
+    adicionais: AdicionalProduto[];
 }

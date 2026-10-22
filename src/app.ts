@@ -10,11 +10,18 @@ import { dependenciasProdutosTypeorm, montarRotasProdutos } from "./main/produto
 import { consultaCardapioTypeorm, montarRotasCardapio } from "./main/cardapio";
 import { dependenciasBairrosTypeorm, montarRotasBairros } from "./main/bairros";
 import { dependenciasMotoboysTypeorm, montarRotasMotoboys } from "./main/motoboys";
+import { inicializarBanco } from "./database";
 
 export const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Em Vercel cada pedido pode iniciar uma execução fria. A promessa fica no
+// módulo para compartilhar a conexão e a inicialização concorrente por instância.
+app.use((_req, _res, next) => {
+    void inicializarBanco().then(() => next()).catch(next);
+});
 
 app.use("/health", healthRotas());
 
@@ -35,3 +42,5 @@ app.use("/api/motoboys", montarRotasMotoboys(dependenciasMotoboysTypeorm(AppData
 
 // Tratamento de erros: sempre o último middleware registrado.
 app.use(tratarErros);
+
+export default app;

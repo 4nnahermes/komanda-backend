@@ -193,7 +193,9 @@ Define a ordem de todas as categorias de uma vez, como fica depois de o atendent
   "descricao": "Pão, hambúrguer, ovo, presunto, queijo, alface, tomate e milho",
   "preco": 32.9,
   "ativo": true,
-  "categoria": { "id": 1, "nome": "Xis" }
+  "categoria": { "id": 1, "nome": "Xis" },
+  "ingredientes": ["cebola", "tomate"],
+  "adicionais": [{ "nome": "Queijo extra", "preco": 4.1 }]
 }
 ```
 
@@ -204,8 +206,10 @@ Define a ordem de todas as categorias de uma vez, como fica depois de o atendent
 | `preco` | número | obrigatório, maior que zero, até 2 casas decimais |
 | `ativo` | booleano | `true` ao criar |
 | `categoria` | objeto | a categoria do produto (`id` e `nome`) |
+| `ingredientes` | lista de textos | opcional, até 50 valores únicos aparados, com 1 a 120 caracteres |
+| `adicionais` | lista de objetos | opcional, até 50. Cada item tem nome único (sem diferenciar caixa) de até 100 caracteres e preço de R$ 0,00 a R$ 99.999.999,99 em centavos |
 
-> A ficha técnica (Requisito 5) e os grupos de complementos (Requisito 6) terão rotas próprias quando forem implementados.
+> `ingredientes` são nomes que podem ser removidos na tela do protótipo, não uma ficha técnica nem baixa de estoque. `adicionais` são opções textuais com preço; não movimentam estoque.
 
 ### `GET /api/produtos`
 
@@ -224,6 +228,8 @@ Lista os produtos ordenados pela ordem da categoria e depois pelo nome.
 |---|---|
 | 400 | `O filtro categoriaId deve ser um número inteiro maior que zero` |
 | 400 | `O filtro ativo deve ser true ou false` |
+| 400 | Ingredientes devem ser até 50 textos únicos não vazios de até 120 caracteres |
+| 400 | Adicionais devem ser até 50 objetos com nomes únicos de até 100 caracteres e preços de 0 a 99999999.99 com até 2 casas decimais |
 
 ### `GET /api/produtos/:id`
 
@@ -239,7 +245,9 @@ Lista os produtos ordenados pela ordem da categoria e depois pelo nome.
   "nome": "Xis Coração",
   "categoriaId": 1,
   "descricao": "Pão, coração de frango, ovo, queijo, alface e tomate",
-  "preco": 36.5
+  "preco": 36.5,
+  "ingredientes": ["cebola", "tomate"],
+  "adicionais": [{ "nome": "Queijo extra", "preco": 4.1 }]
 }
 ```
 
@@ -279,7 +287,11 @@ Edita nome, descrição, preço, categoria e/ou status. Só os campos enviados s
 { "descricao": null }
 ```
 
-Enviar `descricao: null` remove a descrição. Mudar o nome ou a categoria confere de novo se o nome está livre na categoria de destino.
+```json
+{ "ingredientes": [], "adicionais": [] }
+```
+
+Enviar `descricao: null` remove a descrição. Listas vazias limpam ingredientes ou adicionais. Campos omitidos permanecem intactos. Mudar o nome ou a categoria confere de novo se o nome está livre na categoria de destino.
 
 **200 OK** — o objeto `Produto` atualizado.
 
@@ -341,6 +353,8 @@ Devolve o cardápio pronto para exibir: as categorias **ativas**, na ordem defin
 ```
 
 No exemplo, a categoria Bauru (ordem 2) não aparece porque ainda não tem produtos ativos. Se não houver nada cadastrado, devolve `[]`.
+
+Cada produto também inclui `ingredientes` e `adicionais` no mesmo formato do cadastro de produtos.
 
 ---
 
@@ -410,6 +424,7 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 | 0.2 | 06/10/2026 | Edição passa a ser só por `PATCH` (o status `ativo` vai no mesmo `PATCH`); incluída a exclusão com `DELETE` em categorias, produtos e demais cadastros |
 | 0.4 | 22/10/2026 | Contratos complementares de bairros/motoboys, plano e limites da integração |
 | 0.3 | 07/10/2026 | Produtos: mensagens de erro de tamanho, tipo e casas decimais; erros dos filtros da listagem; `descricao: null` no `PATCH` |
+| 0.5 | 22/10/2026 | Integração Mau Mau: ingredientes e adicionais nos produtos, edição parcial normalizada, inicialização serverless e migrations compiladas |
 
 ## Contratos complementares da Sprint 3
 

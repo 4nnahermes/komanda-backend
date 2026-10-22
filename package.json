@@ -12,12 +12,16 @@
     "typecheck": "tsc -p tsconfig.test.json",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
+    "migration:run:compiled": "npm run build && typeorm migration:run -d dist/data-source.js",
+    "migration:revert:compiled": "npm run build && typeorm migration:revert -d dist/data-source.js",
+    "migration:show:compiled": "npm run build && typeorm migration:show -d dist/data-source.js"
   },
   "keywords": [],
   "author": "Anna Hermes, Diego Silva, Gabriel Lessa, Lucas Sol",
   "license": "ISC",
   "type": "commonjs",
+  "engines": { "node": ">=20" },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

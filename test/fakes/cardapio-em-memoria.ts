@@ -45,6 +45,25 @@ export class CardapioEmMemoria {
             return id;
         },
 
+        atualizarCampos: async (id, campos) => {
+            const atual = this.produtos.get(id);
+            if (!atual) return false;
+            const atualizado = Produto.restaurar({
+                id, nome: atual.nome, descricao: atual.descricao, preco: atual.preco,
+                categoriaId: atual.categoriaId, ativo: atual.ativo,
+                ingredientes: atual.ingredientes, adicionais: atual.adicionais,
+            });
+            if (campos.nome !== undefined) atualizado.renomear(campos.nome);
+            if (campos.descricao !== undefined) atualizado.alterarDescricao(campos.descricao);
+            if (campos.preco !== undefined) atualizado.alterarPreco(campos.preco);
+            if (campos.categoriaId !== undefined) atualizado.moverParaCategoria(campos.categoriaId);
+            if (campos.ativo !== undefined) atualizado.definirAtivo(campos.ativo);
+            if (campos.ingredientes !== undefined) atualizado.alterarIngredientes(campos.ingredientes);
+            if (campos.adicionais !== undefined) atualizado.alterarAdicionais(campos.adicionais);
+            this.produtos.set(id, atualizado);
+            return true;
+        },
+
         excluir: async (id) => {
             this.produtos.delete(id);
         },
@@ -72,7 +91,7 @@ export class CardapioEmMemoria {
                     const categoria = this.categoria(p.categoriaId);
                     return {
                         categoria: { id: categoria.id, nome: categoria.nome, ordem: categoria.ordem },
-                        produto: { id: p.id as number, nome: p.nome, descricao: p.descricao, preco: p.preco.emReais },
+                        produto: { id: p.id as number, nome: p.nome, descricao: p.descricao, preco: p.preco.emReais, ingredientes: p.ingredientes, adicionais: p.adicionais },
                     };
                 }),
     };
@@ -96,6 +115,8 @@ export class CardapioEmMemoria {
             preco: produto.preco.emReais,
             ativo: produto.ativo,
             categoria: { id: categoria.id, nome: categoria.nome },
+            ingredientes: produto.ingredientes,
+            adicionais: produto.adicionais,
         };
     }
 }
@@ -110,5 +131,7 @@ function copiarComId(produto: Produto, id: number): Produto {
         preco: produto.preco,
         categoriaId: produto.categoriaId,
         ativo: produto.ativo,
+        ingredientes: produto.ingredientes,
+        adicionais: produto.adicionais,
     });
 }

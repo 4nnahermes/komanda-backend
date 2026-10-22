@@ -1,4 +1,5 @@
 import { CategoriaResumida } from "../../../dominio/cardapio/categorias-do-cardapio";
+import { AdicionalProduto } from "../../../dominio/cardapio/produto";
 
 // Produto no formato de resposta da API: preço em reais e a categoria com o nome.
 export interface ProdutoDetalhado {
@@ -8,6 +9,8 @@ export interface ProdutoDetalhado {
     preco: number;
     ativo: boolean;
     categoria: CategoriaResumida;
+    ingredientes: string[];
+    adicionais: AdicionalProduto[];
 }
 
 export interface FiltroProdutos {

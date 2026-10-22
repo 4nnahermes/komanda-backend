@@ -1,19 +1,10 @@
 import { CategoriasDoCardapio } from "../../../dominio/cardapio/categorias-do-cardapio";
-import { Produto } from "../../../dominio/cardapio/produto";
+import { AlteracoesProduto, Produto } from "../../../dominio/cardapio/produto";
 import { RepositorioProdutos } from "../../../dominio/cardapio/repositorio-produtos";
 import { ConflitoDeDados, ErroDeValidacao, RecursoNaoEncontrado } from "../../../dominio/compartilhado/erros";
 import { BuscarProduto } from "./buscar-produto";
 import { ConsultaProdutos, ProdutoDetalhado } from "./consulta-produtos";
 import { MENSAGENS } from "./mensagens";
-
-// Só os campos informados são alterados.
-export interface AlteracoesProduto {
-    nome?: string;
-    descricao?: string | null;
-    preco?: number;
-    categoriaId?: number;
-    ativo?: boolean;
-}
 
 export class AtualizarProduto {
     private readonly buscarProduto: BuscarProduto;
@@ -40,8 +31,22 @@ export class AtualizarProduto {
         await this.garantirCategoriaExistente(produto, alteracoes);
         await this.garantirNomeLivre(id, produto, alteracoes);
 
-        await this.repositorio.salvar(produto);
+        if (!(await this.repositorio.atualizarCampos(id, this.normalizarCampos(produto, alteracoes)))) {
+            throw new RecursoNaoEncontrado(MENSAGENS.produtoNaoEncontrado);
+        }
         return this.buscarProduto.executar(id);
+    }
+
+    private normalizarCampos(produto: Produto, alteracoes: AlteracoesProduto): AlteracoesProduto {
+        const campos: AlteracoesProduto = {};
+        if (alteracoes.nome !== undefined) campos.nome = produto.nome;
+        if (alteracoes.descricao !== undefined) campos.descricao = produto.descricao;
+        if (alteracoes.preco !== undefined) campos.preco = produto.preco.emReais;
+        if (alteracoes.categoriaId !== undefined) campos.categoriaId = produto.categoriaId;
+        if (alteracoes.ativo !== undefined) campos.ativo = produto.ativo;
+        if (alteracoes.ingredientes !== undefined) campos.ingredientes = produto.ingredientes;
+        if (alteracoes.adicionais !== undefined) campos.adicionais = produto.adicionais;
+        return campos;
     }
 
     private aplicar(produto: Produto, alteracoes: AlteracoesProduto): void {
@@ -50,6 +55,8 @@ export class AtualizarProduto {
         if (alteracoes.preco !== undefined) produto.alterarPreco(alteracoes.preco);
         if (alteracoes.categoriaId !== undefined) produto.moverParaCategoria(alteracoes.categoriaId);
         if (alteracoes.ativo !== undefined) produto.definirAtivo(alteracoes.ativo);
+        if (alteracoes.ingredientes !== undefined) produto.alterarIngredientes(alteracoes.ingredientes);
+        if (alteracoes.adicionais !== undefined) produto.alterarAdicionais(alteracoes.adicionais);
     }
 
     private async garantirCategoriaExistente(produto: Produto, alteracoes: AlteracoesProduto): Promise<void> {

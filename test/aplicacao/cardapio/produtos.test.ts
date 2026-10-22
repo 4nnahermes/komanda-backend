@@ -30,7 +30,18 @@ describe("casos de uso de produtos", () => {
                 preco: 32.9,
                 ativo: true,
                 categoria: { id: 1, nome: "Xis" },
+                ingredientes: [],
+                adicionais: [],
             });
+        });
+
+        it("normaliza e devolve ingredientes e adicionais com preço em centavos", async () => {
+            const produto = await criar.executar({
+                nome: "Xis Carne", preco: 32.9, categoriaId: 1,
+                ingredientes: [" cebola ", "tomate"], adicionais: [{ nome: "Queijo", preco: 4.1 }],
+            });
+            expect(produto.ingredientes).toEqual(["cebola", "tomate"]);
+            expect(produto.adicionais).toEqual([{ nome: "Queijo", preco: 4.1 }]);
         });
 
         it("recusa categoria inexistente", async () => {

@@ -42,5 +42,7 @@ function paraDetalhado(modelo: ProdutoModelo): ProdutoDetalhado {
         preco: modelo.preco,
         ativo: modelo.ativo,
         categoria: { id: modelo.categoria.id, nome: modelo.categoria.nome },
+        ingredientes: modelo.ingredientes,
+        adicionais: modelo.adicionais,
     };
 }

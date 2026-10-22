@@ -16,7 +16,7 @@ export class ConsultaCardapioTypeorm implements ConsultaCardapio {
 
         return produtos.map((produto) => ({
             categoria: { id: produto.categoria.id, nome: produto.categoria.nome, ordem: produto.categoria.ordem },
-            produto: { id: produto.id, nome: produto.nome, descricao: produto.descricao, preco: produto.preco },
+            produto: { id: produto.id, nome: produto.nome, descricao: produto.descricao, preco: produto.preco, ingredientes: produto.ingredientes, adicionais: produto.adicionais },
         }));
     }
 }

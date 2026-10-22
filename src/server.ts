@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import "dotenv/config";
-import { AppDataSource } from "./data-source";
+import { inicializarBanco } from "./database";
 import { app } from "./app";
 
 const port = Number(process.env.PORT ?? 3000);
 
-AppDataSource.initialize()
+inicializarBanco()
     .then(() => {
         app.listen(port, () => {
             console.log(`Komanda API rodando em http://localhost:${port}`);

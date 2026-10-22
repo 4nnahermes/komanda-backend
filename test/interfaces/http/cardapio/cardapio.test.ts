@@ -26,7 +26,7 @@ describe("API do cardápio", () => {
                 id: 1,
                 nome: "Xis",
                 ordem: 1,
-                produtos: [{ id: 1, nome: "Xis Carne", descricao: "Pão e carne", preco: 32.9 }],
+                produtos: [{ id: 1, nome: "Xis Carne", descricao: "Pão e carne", preco: 32.9, ingredientes: [], adicionais: [] }],
             },
         ]);
     });
