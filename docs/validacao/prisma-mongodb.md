@@ -23,3 +23,10 @@ Backend publicado em https://komanda-backend.vercel.app. `/health` e listagens d
 Pelo navegador público, foram criados uma categoria e um produto de verificação, recuperados após recarregar a página e conferidos novamente pela API. Depois foram removidos somente esses dois registros próprios de verificação. A configuração do banco não foi exposta em logs ou commits. Nenhum dado do PostgreSQL/Supabase original foi importado ou modificado.
 
 Pedidos, quadro, estoque e caixa permanecem demonstrativos e não foram anunciados como persistidos no Atlas.
+
+
+## Revalidação para o repositório principal — 29/10/2026
+
+Para o PR destinado a `4nnahermes/komanda-backend`, a main foi comparada novamente: continua na base `4f9020a` da migração. Node.js 24.22.1: typecheck, 133 testes, validação do schema e build aprovados. Integração repetida em MongoDB local descartável (`komanda_test_pr_anna`), cobrindo HTTP, índices, persistência, limites monetários, PATCH e concorrência, também aprovada.
+
+A documentação de publicação foi adaptada para o repositório da Anna. O backend da conta de Gabriel foi pausado pelo usuário; nenhum deploy da Anna, banco Atlas ou segredo foi alterado nesta revalidação. Estoque foi excluído do MVP inicial por decisão posterior à migração.

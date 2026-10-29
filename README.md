@@ -1,6 +1,6 @@
 # Komanda Backend — Prisma e MongoDB Atlas
 
-API Node.js/TypeScript/Express para o Komanda, com persistência Prisma/MongoDB. Derivada de [4nnahermes/komanda-backend](https://github.com/4nnahermes/komanda-backend), preservando autores e histórico; esta cópia é mantida em [GabrielLTM/komanda-backend](https://github.com/GabrielLTM/komanda-backend). A versão PostgreSQL original não é alterada.
+API Node.js/TypeScript/Express para o Komanda, com persistência Prisma/MongoDB. Repositório principal: [4nnahermes/komanda-backend](https://github.com/4nnahermes/komanda-backend). A migração foi desenvolvida em [GabrielLTM/komanda-backend](https://github.com/GabrielLTM/komanda-backend) e trazida para este repositório preservando autores e histórico.
 
 ## Rodar
 
@@ -29,7 +29,7 @@ MongoDB precisa de replica set para transações. Atlas já oferece replica set;
 
 A API mantém IDs inteiros positivos e valores monetários em reais. No MongoDB, contadores atômicos atribuem IDs e dinheiro é guardado como inteiros de 64 bits em centavos. O frontend não precisa conhecer o modelo interno. Consulte [api-contrato.md](docs/api-contrato.md), [modelo-dados.md](docs/modelo-dados.md) e o [plano da migração](docs/planejamento/prisma-mongodb.md).
 
-Pedidos, estoque, caixa e acertos ainda não têm persistência implementada nesta API. Esta migração troca a persistência dos módulos existentes e não importa dados do PostgreSQL/Supabase.
+Pedidos, caixa e acertos ainda não têm persistência implementada nesta API. Estoque está fora do MVP inicial. Esta migração troca a persistência dos módulos existentes e não importa dados do PostgreSQL/Supabase.
 
 ## Verificar
 

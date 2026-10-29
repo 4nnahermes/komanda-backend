@@ -20,7 +20,7 @@ O schema está em `prisma/schema.prisma`. Prisma MongoDB não usa Prisma Migrate
 
 ## Publicar o backend
 
-Importar `GabrielLTM/komanda-backend` na Vercel, na raiz do repositório. Runtime Node.js 24, aplicação Express, instalação `npm ci` e build `npm run build`. A entrada `src/app.ts` exporta o app; `src/server.ts` mantém a inicialização local. O build gera o Prisma Client, incluindo binário compatível com o runtime Linux da Vercel.
+Importar `4nnahermes/komanda-backend` na Vercel, após incorporar a migração para Prisma/MongoDB, na raiz do repositório. Runtime Node.js 24, aplicação Express, instalação `npm ci` e build `npm run build`. A entrada `src/app.ts` exporta o app; `src/server.ts` mantém a inicialização local. O build gera o Prisma Client, incluindo binário compatível com o runtime Linux da Vercel.
 
 Adicionar `DATABASE_URL` como variável secreta do backend em Production e nos demais ambientes desejados. A string será inserida pelo responsável; nunca fica no repositório. Os índices devem estar preparados no banco de destino antes de testar gravações. Validar `/health`, categorias, produtos/cardápio, bairros e motoboys na URL publicada.
 
@@ -48,3 +48,12 @@ Aguardar o membro ficar PRIMARY. A conexão local é `mongodb://127.0.0.1:55440/
 ## Ambiente publicado
 
 Em 22/10/2026, backend em https://komanda-backend.vercel.app e frontend em https://komanda-frontend.vercel.app, usando Atlas. A preparação inicial dos índices foi executada explicitamente no primeiro deploy e removida do comando de build logo depois. O build configurado permanece `npm run build`; a string de conexão existe somente como variável secreta do projeto backend. Verificação de produção registrada em [prisma-mongodb.md](validacao/prisma-mongodb.md).
+
+
+## Publicação pelo repositório da Anna — 29/10/2026
+
+O backend publicado pela conta de Gabriel foi pausado. A próxima publicação será feita pela Anna a partir de `4nnahermes/komanda-backend`, após revisar e incorporar a migração. A URL de 22/10 acima é um registro histórico, não a confirmação de um serviço atualmente disponível.
+
+No projeto Vercel da Anna, configurar Node.js 24, instalação `npm ci`, build `npm run build` e `DATABASE_URL` como segredo do backend, incluindo o nome do banco na URI. Não copiar a conexão para o código, PR ou frontend. Se utilizar o mesmo banco Atlas já preparado, os dados existentes ficam no banco e não precisam ser importados. Se utilizar um banco novo, preparar explicitamente seus índices com `npm run db:push` antes de testar gravações; o build não prepara índices.
+
+Depois da publicação, conferir `/health` e as listagens dos cadastros. Atualizar `VITE_API_URL` no frontend para `https://NOVA-URL-DO-BACKEND/api` e republicar o frontend. A nova publicação da Anna e sua conexão real ainda precisam ser verificadas.
