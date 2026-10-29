@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url = env("DATABASE_URL")
+}
+
+model Contador {
+  chave String @id @map("_id")
+  valor Int
+  @@map("contadores")
+}
+
+model Categoria {
+  id Int @id @map("_id")
+  nome String
+  nomeNormalizado String @unique
+  ordem Int
+  ativo Boolean @default(true)
+  produtos Produto[]
+  @@index([ordem, id])
+  @@map("categorias")
+}
+
+type Adicional {
+  nome String
+  precoCentavos BigInt
+}
+
+model Produto {
+  id Int @id @map("_id")
+  nome String
+  nomeNormalizado String
+  descricao String?
+  precoCentavos BigInt
+  ativo Boolean @default(true)
+  categoriaId Int
+  categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ingredientes String[]
+  adicionais Adicional[]
+  @@unique([categoriaId, nomeNormalizado])
+  @@index([ativo, categoriaId])
+  @@map("produtos")
+}
+
+model Bairro {
+  id Int @id @map("_id")
+  nome String
+  nomeNormalizado String @unique
+  taxaEntregaCentavos BigInt
+  ativo Boolean @default(true)
+  @@index([nome, id])
+  @@map("bairros")
+}
+
+model Motoboy {
+  id Int @id @map("_id")
+  nome String
+  nomeNormalizado String @unique
+  telefone String?
+  valorFixoNoiteCentavos BigInt
+  ativo Boolean @default(true)
+  @@index([nome, id])
+  @@map("motoboys")
+}

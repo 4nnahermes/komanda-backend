@@ -66,7 +66,7 @@ export class CategoriaController {
     // Um id que não é número inteiro positivo não existe no banco.
     private lerId(req: Request): number {
         const id = Number(req.params.id);
-        if (!Number.isInteger(id) || id <= 0) {
+        if (!Number.isInteger(id) || id <= 0 || id > 2147483647) {
             throw new ErroApi(404, "Categoria não encontrada");
         }
         return id;

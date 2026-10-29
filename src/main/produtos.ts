@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { DataSource } from "typeorm";
+import { PrismaClient } from "@prisma/client";
 import { AtualizarProduto } from "../aplicacao/cardapio/produtos/atualizar-produto";
 import { BuscarProduto } from "../aplicacao/cardapio/produtos/buscar-produto";
 import { ConsultaProdutos } from "../aplicacao/cardapio/produtos/consulta-produtos";
@@ -8,9 +8,9 @@ import { ExcluirProduto } from "../aplicacao/cardapio/produtos/excluir-produto";
 import { ListarProdutos } from "../aplicacao/cardapio/produtos/listar-produtos";
 import { CategoriasDoCardapio } from "../dominio/cardapio/categorias-do-cardapio";
 import { RepositorioProdutos } from "../dominio/cardapio/repositorio-produtos";
-import { CategoriasDoCardapioTypeorm } from "../infraestrutura/typeorm/cardapio/categorias-do-cardapio-typeorm";
-import { ConsultaProdutosTypeorm } from "../infraestrutura/typeorm/cardapio/consulta-produtos-typeorm";
-import { RepositorioProdutosTypeorm } from "../infraestrutura/typeorm/cardapio/repositorio-produtos-typeorm";
+import { CategoriasDoCardapioPrisma } from "../infraestrutura/prisma/cardapio/categorias-do-cardapio-prisma";
+import { ConsultaProdutosPrisma } from "../infraestrutura/prisma/cardapio/consulta-produtos-prisma";
+import { RepositorioProdutosPrisma } from "../infraestrutura/prisma/cardapio/repositorio-produtos-prisma";
 import { ProdutosController } from "../interfaces/http/cardapio/produtos-controller";
 import { produtosRotas } from "../interfaces/http/cardapio/produtos-rotas";
 
@@ -33,10 +33,10 @@ export function montarRotasProdutos({ repositorio, consulta, categorias }: Depen
     return produtosRotas(controller);
 }
 
-export function dependenciasProdutosTypeorm(dataSource: DataSource): DependenciasProdutos {
+export function dependenciasProdutosPrisma(prisma: PrismaClient): DependenciasProdutos {
     return {
-        repositorio: new RepositorioProdutosTypeorm(dataSource),
-        consulta: new ConsultaProdutosTypeorm(dataSource),
-        categorias: new CategoriasDoCardapioTypeorm(dataSource),
+        repositorio: new RepositorioProdutosPrisma(prisma),
+        consulta: new ConsultaProdutosPrisma(prisma),
+        categorias: new CategoriasDoCardapioPrisma(prisma),
     };
 }

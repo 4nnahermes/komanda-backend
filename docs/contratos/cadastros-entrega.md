@@ -46,7 +46,7 @@ Sempre `{ "erro": "mensagem" }`. As mensagens abaixo são contrato dos módulos.
 | Nome duplicado | 409 | Já existe um bairro com esse nome / Já existe um motoboy com esse nome |
 | Referência impede exclusão | 409 | Não é possível excluir um bairro em uso. Desative o bairro / Não é possível excluir um motoboy em uso. Desative o motoboy |
 
-JSON malformado e falhas inesperadas seguem o middleware compartilhado. A proteção de exclusão em uso traduz a violação FK do PostgreSQL; pedidos ainda não existem nesta sprint. Nenhum acerto financeiro é calculado pelo cadastro. O valor individual segue R26/modelo original; diária global exibida no protótipo depende de decisão futura e não é copiada como regra de negócio.
+JSON malformado e falhas inesperadas seguem o middleware compartilhado. MongoDB não tem foreign keys; pedidos ainda não existem nesta API e não há bloqueio fictício de uso por pedidos. Nenhum acerto financeiro é calculado pelo cadastro. O valor individual segue R26/modelo original; diária global exibida no protótipo depende de decisão futura e não é copiada como regra de negócio.
 
 ## Exemplos
 

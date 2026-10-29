@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import "dotenv/config";
 import { inicializarBanco } from "./database";
 import { app } from "./app";
@@ -12,8 +11,7 @@ inicializarBanco()
             console.log(`Verificação: http://localhost:${port}/health`);
         });
     })
-    .catch((erro: Error) => {
-        console.error("Não foi possível conectar ao banco. Confira o arquivo .env e se o PostgreSQL está rodando.");
-        console.error(erro.message);
+    .catch(() => {
+        console.error("Não foi possível conectar ao MongoDB. Confira DATABASE_URL e o acesso ao replica set.");
         process.exit(1);
     });

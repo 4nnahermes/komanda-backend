@@ -1,7 +1,7 @@
 import { AlteracoesProduto, Produto } from "./produto";
 
 // O que os casos de uso precisam para gravar produtos.
-// A implementação com TypeORM fica em src/infraestrutura.
+// As implementações de persistência ficam em src/infraestrutura.
 export interface RepositorioProdutos {
     buscarPorId(id: number): Promise<Produto | null>;
 

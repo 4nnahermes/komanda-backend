@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ConflitoDeDados, ErroDeValidacao, RecursoNaoEncontrado } from "../../dominio/compartilhado/erros";
+import { registrarErro } from "../../utils/registrar-erro";
 
 // Middleware único de erros, registrado por último no app.
 // Traduz os erros do domínio para o código HTTP e para o formato
@@ -22,7 +23,7 @@ export function tratarErros(erro: unknown, req: Request, res: Response, next: Ne
         return;
     }
 
-    console.error(erro);
+    registrarErro(erro);
     res.status(500).json({ erro: "Erro inesperado no servidor" });
 }
 
