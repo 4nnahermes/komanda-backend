@@ -66,3 +66,68 @@ model Motoboy {
   @@index([nome, id])
   @@map("motoboys")
 }
+
+enum TipoPedido {
+  ENTREGA
+  RETIRADA
+}
+
+enum StatusPedido {
+  EM_PREPARO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+enum FormaPagamento {
+  PIX
+  CREDITO
+  DEBITO
+  DINHEIRO
+  FIADO
+}
+
+// Cópia de id e nome no momento do pedido. Renomear o bairro ou o motoboy
+// depois não altera pedidos antigos.
+type ReferenciaPedido {
+  id Int
+  nome String
+}
+
+type AdicionalItemPedido {
+  nome String
+  precoCentavos BigInt
+}
+
+// Nome e preços copiados do cardápio no momento da venda (RN5).
+type ItemPedido {
+  produtoId Int
+  nome String
+  quantidade Int
+  precoUnitarioCentavos BigInt
+  ingredientesRetirados String[]
+  adicionais AdicionalItemPedido[]
+}
+
+model Pedido {
+  id Int @id @map("_id")
+  // Reinicia a cada noite de operação.
+  numero Int
+  // AAAA-MM-DD; a noite vira às 06:00 de Brasília.
+  noite String
+  criadoEm DateTime
+  tipo TipoPedido
+  status StatusPedido
+  nomeCliente String
+  telefone String?
+  bairro ReferenciaPedido?
+  endereco String?
+  itens ItemPedido[]
+  taxaEntregaCentavos BigInt
+  formaPagamento FormaPagamento
+  valorRecebidoCentavos BigInt?
+  motoboy ReferenciaPedido?
+  @@unique([noite, numero])
+  @@index([noite, status])
+  @@map("pedidos")
+}

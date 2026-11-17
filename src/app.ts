@@ -10,6 +10,7 @@ import { dependenciasProdutosPrisma, montarRotasProdutos } from "./main/produtos
 import { consultaCardapioPrisma, montarRotasCardapio } from "./main/cardapio";
 import { dependenciasBairrosPrisma, montarRotasBairros } from "./main/bairros";
 import { dependenciasMotoboysPrisma, montarRotasMotoboys } from "./main/motoboys";
+import { dependenciasPedidosPrisma, montarRotasPedidos } from "./main/pedidos";
 import { inicializarBanco } from "./database";
 
 export const app = express();
@@ -41,6 +42,9 @@ app.use("/api/cardapio", montarRotasCardapio(consultaCardapioPrisma(prisma)));
 app.use("/api/bairros", montarRotasBairros(dependenciasBairrosPrisma(prisma)));
 // Cadastro de motoboys
 app.use("/api/motoboys", montarRotasMotoboys(dependenciasMotoboysPrisma(prisma)));
+
+// Pedidos (Requisitos 9 a 18)
+app.use("/api/pedidos", montarRotasPedidos(dependenciasPedidosPrisma(prisma)));
 
 // Tratamento de erros: sempre o último middleware registrado.
 app.use(tratarErros);
