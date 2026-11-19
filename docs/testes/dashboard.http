@@ -1,0 +1,25 @@
+### Testes manuais do dashboard e do fechamento de caixa
+### Abra no VS Code com a extensão "REST Client" e clique em "Send Request" acima de cada bloco.
+### Só pedidos ENTREGUE entram nos números. Ajuste as datas para noites com pedidos.
+
+@api = http://localhost:3000/api
+
+### 1. Métricas da noite atual
+GET {{api}}/dashboard/metricas
+
+### 2. Métricas de um período
+GET {{api}}/dashboard/metricas?inicio=2026-11-01&fim=2026-11-30
+
+### 3. Fechamento do caixa da noite atual, com o acerto dos motoboys
+GET {{api}}/caixa/fechamento
+
+### 4. Fechamento de uma noite específica
+GET {{api}}/caixa/fechamento?noite=2026-11-19
+
+### --- Erros esperados ---
+
+### 400: data em formato errado
+GET {{api}}/dashboard/metricas?inicio=19-11-2026
+
+### 400: período invertido
+GET {{api}}/dashboard/metricas?inicio=2026-11-20&fim=2026-11-19

@@ -11,6 +11,7 @@ import { consultaCardapioPrisma, montarRotasCardapio } from "./main/cardapio";
 import { dependenciasBairrosPrisma, montarRotasBairros } from "./main/bairros";
 import { dependenciasMotoboysPrisma, montarRotasMotoboys } from "./main/motoboys";
 import { dependenciasPedidosPrisma, montarRotasPedidos } from "./main/pedidos";
+import { dependenciasDashboardPrisma, montarRotasDashboard } from "./main/dashboard";
 import { inicializarBanco } from "./database";
 
 export const app = express();
@@ -45,6 +46,11 @@ app.use("/api/motoboys", montarRotasMotoboys(dependenciasMotoboysPrisma(prisma))
 
 // Pedidos (Requisitos 9 a 18)
 app.use("/api/pedidos", montarRotasPedidos(dependenciasPedidosPrisma(prisma)));
+
+// Dashboard e fechamento de caixa (Requisitos 27 a 31)
+const rotasDashboard = montarRotasDashboard(dependenciasDashboardPrisma(prisma));
+app.use("/api/dashboard", rotasDashboard.dashboard);
+app.use("/api/caixa", rotasDashboard.caixa);
 
 // Tratamento de erros: sempre o último middleware registrado.
 app.use(tratarErros);
