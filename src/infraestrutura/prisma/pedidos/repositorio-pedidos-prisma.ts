@@ -77,7 +77,7 @@ function dinheiro(centavos: bigint): Dinheiro {
     return Dinheiro.deCentavos(Number(centavos));
 }
 
-function paraDominio(registro: RegistroPedido): Pedido {
+export function paraDominio(registro: RegistroPedido): Pedido {
     return Pedido.restaurar({
         id: registro.id,
         numero: registro.numero,
