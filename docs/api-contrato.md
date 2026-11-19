@@ -403,10 +403,94 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 
 | Método | Rota | Descrição | Requisito |
 |---|---|---|---|
-| GET | `/api/caixa/fechamento?data=` | Fechamento do dia por forma de pagamento, taxas e motoboys | R28, R29, RN6 |
+| GET | `/api/caixa/fechamento?noite=` | Fechamento da noite por forma de pagamento, taxas e acerto dos motoboys. Detalhado na seção 6 | R27–R29, RN4, RN6 |
 | GET | `/api/motoboys/acerto?data=` | Acerto de cada motoboy na noite | R27, RN4 |
-| GET | `/api/dashboard/metricas?inicio=&fim=` | Métricas de vendas do período | R30–R32, RN6 |
-| GET | `/api/dashboard/alertas-estoque` | Ingredientes abaixo ou perto do mínimo | R33 |
+| GET | `/api/dashboard/metricas?inicio=&fim=` | Métricas de vendas do período. Detalhado na seção 6 | R30–R32, RN6 |
+
+---
+
+## 6. Dashboard e fechamento de caixa
+
+Contam só pedidos com status `ENTREGUE` (RN6). As datas são noites no formato `AAAA-MM-DD`, que viram às 06:00 de Brasília, como nos pedidos. O estoque saiu do MVP, então não há alertas nem saída de insumos.
+
+### `GET /api/dashboard/metricas`
+
+| Parâmetro (query) | Obrigatório | Descrição |
+|---|---|---|
+| `inicio` | não | Primeira noite do período. Sem `inicio` nem `fim`, usa a noite atual |
+| `fim` | não | Última noite do período, inclusive. Período de até 366 noites |
+
+**200 OK**
+
+```json
+{
+  "inicio": "2026-11-19",
+  "fim": "2026-11-19",
+  "totalVendido": 101,
+  "pedidos": 2,
+  "ticketMedio": 50.5,
+  "porFormaPagamento": [
+    { "formaPagamento": "PIX", "pedidos": 1, "total": 8 },
+    { "formaPagamento": "CREDITO", "pedidos": 0, "total": 0 },
+    { "formaPagamento": "DEBITO", "pedidos": 0, "total": 0 },
+    { "formaPagamento": "DINHEIRO", "pedidos": 1, "total": 93 },
+    { "formaPagamento": "FIADO", "pedidos": 0, "total": 0 }
+  ],
+  "produtoMaisVendido": { "id": 2, "nome": "Refri lata", "quantidade": 3 },
+  "produtoMenosVendido": { "id": 1, "nome": "Xis Salada", "quantidade": 2 },
+  "categoriaMaisVendida": { "id": 2, "nome": "Bebidas", "quantidade": 3 }
+}
+```
+
+- `totalVendido` inclui a taxa de entrega, como o total do pedido (RN1).
+- O ranking conta quantidade vendida. O menos vendido é escolhido entre os produtos que tiveram venda no período.
+- A categoria é a atual do produto. Produto excluído não entra na categoria mais vendida.
+- Sem vendas, os produtos e a categoria vêm `null`, e os valores, `0`.
+
+**Erros**
+
+| Código | Mensagem |
+|---|---|
+| 400 | `O filtro inicio deve estar no formato AAAA-MM-DD` |
+| 400 | `O filtro fim deve estar no formato AAAA-MM-DD` |
+| 400 | `O início do período deve ser anterior ou igual ao fim` |
+| 400 | `O período pode ter no máximo 366 dias` |
+
+### `GET /api/caixa/fechamento`
+
+| Parâmetro (query) | Obrigatório | Descrição |
+|---|---|---|
+| `noite` | não | Noite do fechamento. Sem o parâmetro, usa a noite atual |
+
+**200 OK**
+
+```json
+{
+  "noite": "2026-11-19",
+  "pedidos": 2,
+  "totalVendido": 101,
+  "porFormaPagamento": [
+    { "formaPagamento": "PIX", "pedidos": 1, "total": 8 },
+    { "formaPagamento": "CREDITO", "pedidos": 0, "total": 0 },
+    { "formaPagamento": "DEBITO", "pedidos": 0, "total": 0 },
+    { "formaPagamento": "DINHEIRO", "pedidos": 1, "total": 93 },
+    { "formaPagamento": "FIADO", "pedidos": 0, "total": 0 }
+  ],
+  "totalTaxasEntrega": 5,
+  "motoboys": [
+    { "id": 1, "nome": "Cleber", "entregas": 1, "valorFixoNoite": 40, "taxasEntrega": 5, "totalAPagar": 45 }
+  ]
+}
+```
+
+- `motoboys` lista quem fez ao menos uma entrega na noite. O acerto é o valor fixo da noite mais a soma das taxas das entregas (RN4).
+- Se o motoboy foi excluído depois da entrega, o acerto traz só as taxas.
+
+**Erros**
+
+| Código | Mensagem |
+|---|---|
+| 400 | `O filtro noite deve estar no formato AAAA-MM-DD` |
 
 ---
 
