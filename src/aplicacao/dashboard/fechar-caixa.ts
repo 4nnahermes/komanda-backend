@@ -2,7 +2,7 @@ import { Dinheiro } from "../../dominio/compartilhado/dinheiro";
 import { noiteDe } from "../../dominio/pedidos/noite";
 import { Pedido } from "../../dominio/pedidos/pedido";
 import { ConsultaDashboard } from "./consulta-dashboard";
-import { VendasPorFormaPagamento, porFormaPagamento, somarTotais } from "./vendas";
+import { VendasPorFormaPagamento, porFormaPagamento, semFiado, somarTotais } from "./vendas";
 
 export interface AcertoDoMotoboy {
     id: number;
@@ -24,6 +24,7 @@ export interface FechamentoDeCaixa {
 
 // Fechamento do caixa de uma noite (Requisitos 28 e 29) com o acerto
 // de cada motoboy (Requisito 27, RN4). Conta só pedidos entregues (RN6).
+// O fiado fica fora das vendas e das taxas arrecadadas, mas a entrega conta no acerto do motoboy.
 export class FecharCaixa {
     constructor(
         private readonly consulta: ConsultaDashboard,
@@ -34,13 +35,14 @@ export class FecharCaixa {
         const noiteDoFechamento = noite ?? noiteDe(this.agora());
         const pedidos = await this.consulta.listarPedidosEntregues(noiteDoFechamento, noiteDoFechamento);
         const entregas = pedidos.filter((pedido) => pedido.tipo === "ENTREGA");
+        const vendas = semFiado(pedidos);
 
         return {
             noite: noiteDoFechamento,
-            pedidos: pedidos.length,
-            totalVendido: somarTotais(pedidos).emReais,
-            porFormaPagamento: porFormaPagamento(pedidos),
-            totalTaxasEntrega: somarTaxas(entregas).emReais,
+            pedidos: vendas.length,
+            totalVendido: somarTotais(vendas).emReais,
+            porFormaPagamento: porFormaPagamento(vendas),
+            totalTaxasEntrega: somarTaxas(semFiado(entregas)).emReais,
             motoboys: await this.acertos(entregas),
         };
     }

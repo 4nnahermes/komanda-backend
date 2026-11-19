@@ -28,27 +28,26 @@ function dados() {
 }
 
 describe("ConsultarMetricas", () => {
-    it("usa a noite atual e conta só pedidos entregues", async () => {
+    it("usa a noite atual e conta só pedidos entregues, sem o fiado", async () => {
         const metricas = await new ConsultarMetricas(dados(), AGORA).executar({});
         expect(metricas).toMatchObject({
             inicio: "2026-11-17", fim: "2026-11-17",
-            totalVendido: 118, pedidos: 3, ticketMedio: 39.33,
-            produtoMaisVendido: { id: 20, nome: "Refrigerante lata", quantidade: 4 },
+            totalVendido: 112, pedidos: 2, ticketMedio: 56,
+            produtoMaisVendido: { id: 20, nome: "Refrigerante lata", quantidade: 3 },
             produtoMenosVendido: { id: 30, nome: "Batata frita", quantidade: 1 },
-            categoriaMaisVendida: { id: 2, nome: "Bebidas", quantidade: 4 },
+            categoriaMaisVendida: { id: 2, nome: "Bebidas", quantidade: 3 },
         });
         expect(metricas.porFormaPagamento).toEqual([
             { formaPagamento: "PIX", pedidos: 1, total: 33 },
             { formaPagamento: "CREDITO", pedidos: 0, total: 0 },
             { formaPagamento: "DEBITO", pedidos: 0, total: 0 },
             { formaPagamento: "DINHEIRO", pedidos: 1, total: 79 },
-            { formaPagamento: "FIADO", pedidos: 1, total: 6 },
         ]);
     });
 
     it("soma as noites do período", async () => {
         const metricas = await new ConsultarMetricas(dados(), AGORA).executar({ inicio: "2026-11-16", fim: "2026-11-17" });
-        expect(metricas.pedidos).toBe(4);
+        expect(metricas.pedidos).toBe(3);
         expect(metricas.produtoMaisVendido).toEqual({ id: 30, nome: "Batata frita", quantidade: 5 });
     });
 
@@ -65,11 +64,22 @@ describe("ConsultarMetricas", () => {
 });
 
 describe("FecharCaixa", () => {
-    it("fecha a noite com taxas e acerto dos motoboys (RN4)", async () => {
+    it("fecha a noite com taxas e acerto dos motoboys (RN4), sem o fiado", async () => {
         const fechamento = await new FecharCaixa(dados(), AGORA).executar();
-        expect(fechamento).toMatchObject({ noite: "2026-11-17", pedidos: 3, totalVendido: 118, totalTaxasEntrega: 13 });
+        expect(fechamento).toMatchObject({ noite: "2026-11-17", pedidos: 2, totalVendido: 112, totalTaxasEntrega: 13 });
+        expect(fechamento.porFormaPagamento.map((forma) => forma.formaPagamento)).not.toContain("FIADO");
         expect(fechamento.motoboys).toEqual([
             { id: 7, nome: "Cleber", entregas: 2, valorFixoNoite: 40, taxasEntrega: 13, totalAPagar: 53 },
+        ]);
+    });
+
+    it("paga ao motoboy a entrega fiado, sem somar a taxa nas taxas arrecadadas", async () => {
+        const banco = dados();
+        banco.adicionarPedido({ noite: "2026-11-17", itens: [{ ...xis, quantidade: 1 }], formaPagamento: "FIADO", taxa: 6, motoboy: { id: 7, nome: "Cleber" } });
+        const fechamento = await new FecharCaixa(banco, AGORA).executar();
+        expect(fechamento).toMatchObject({ pedidos: 2, totalVendido: 112, totalTaxasEntrega: 13 });
+        expect(fechamento.motoboys).toEqual([
+            { id: 7, nome: "Cleber", entregas: 3, valorFixoNoite: 40, taxasEntrega: 19, totalAPagar: 59 },
         ]);
     });
 

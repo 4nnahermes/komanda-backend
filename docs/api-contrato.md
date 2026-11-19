@@ -411,7 +411,7 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 
 ## 6. Dashboard e fechamento de caixa
 
-Contam só pedidos com status `ENTREGUE` (RN6). As datas são noites no formato `AAAA-MM-DD`, que viram às 06:00 de Brasília, como nos pedidos. O estoque saiu do MVP, então não há alertas nem saída de insumos.
+Contam só pedidos com status `ENTREGUE` (RN6). Pedidos no fiado ficam fora de todas as métricas de venda, porque o fiado funciona quase como um brinde: não entram no total vendido, no número de pedidos, no ticket médio, nas formas de pagamento nem no ranking de produtos. As datas são noites no formato `AAAA-MM-DD`, que viram às 06:00 de Brasília, como nos pedidos. O estoque saiu do MVP, então não há alertas nem saída de insumos.
 
 ### `GET /api/dashboard/metricas`
 
@@ -433,8 +433,7 @@ Contam só pedidos com status `ENTREGUE` (RN6). As datas são noites no formato 
     { "formaPagamento": "PIX", "pedidos": 1, "total": 8 },
     { "formaPagamento": "CREDITO", "pedidos": 0, "total": 0 },
     { "formaPagamento": "DEBITO", "pedidos": 0, "total": 0 },
-    { "formaPagamento": "DINHEIRO", "pedidos": 1, "total": 93 },
-    { "formaPagamento": "FIADO", "pedidos": 0, "total": 0 }
+    { "formaPagamento": "DINHEIRO", "pedidos": 1, "total": 93 }
   ],
   "produtoMaisVendido": { "id": 2, "nome": "Refri lata", "quantidade": 3 },
   "produtoMenosVendido": { "id": 1, "nome": "Xis Salada", "quantidade": 2 },
@@ -473,8 +472,7 @@ Contam só pedidos com status `ENTREGUE` (RN6). As datas são noites no formato 
     { "formaPagamento": "PIX", "pedidos": 1, "total": 8 },
     { "formaPagamento": "CREDITO", "pedidos": 0, "total": 0 },
     { "formaPagamento": "DEBITO", "pedidos": 0, "total": 0 },
-    { "formaPagamento": "DINHEIRO", "pedidos": 1, "total": 93 },
-    { "formaPagamento": "FIADO", "pedidos": 0, "total": 0 }
+    { "formaPagamento": "DINHEIRO", "pedidos": 1, "total": 93 }
   ],
   "totalTaxasEntrega": 5,
   "motoboys": [
@@ -485,6 +483,7 @@ Contam só pedidos com status `ENTREGUE` (RN6). As datas são noites no formato 
 
 - `motoboys` lista quem fez ao menos uma entrega na noite. O acerto é o valor fixo da noite mais a soma das taxas das entregas (RN4).
 - Se o motoboy foi excluído depois da entrega, o acerto traz só as taxas.
+- Uma entrega no fiado conta no acerto do motoboy, que fez a entrega, mas a taxa dela não entra em `totalTaxasEntrega`, que soma só o que foi arrecadado.
 
 **Erros**
 

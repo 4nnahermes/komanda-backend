@@ -2,7 +2,7 @@ import { Dinheiro } from "../../dominio/compartilhado/dinheiro";
 import { ErroDeValidacao } from "../../dominio/compartilhado/erros";
 import { noiteDe } from "../../dominio/pedidos/noite";
 import { ConsultaDashboard } from "./consulta-dashboard";
-import { VendasPorFormaPagamento, porFormaPagamento, somarTotais } from "./vendas";
+import { VendasPorFormaPagamento, porFormaPagamento, semFiado, somarTotais } from "./vendas";
 
 const MAXIMO_DIAS = 366;
 
@@ -25,7 +25,7 @@ export interface MetricasDoPeriodo {
 }
 
 // Dashboard do gestor (Requisitos 30 e 31): métricas das noites de inicio a fim.
-// Conta só pedidos entregues (RN6). Sem período, usa a noite atual.
+// Conta só pedidos entregues (RN6) e deixa o fiado de fora. Sem período, usa a noite atual.
 export class ConsultarMetricas {
     constructor(
         private readonly consulta: ConsultaDashboard,
@@ -38,7 +38,7 @@ export class ConsultarMetricas {
         const fim = periodo.fim ?? periodo.inicio ?? noiteAtual;
         validarPeriodo(inicio, fim);
 
-        const pedidos = await this.consulta.listarPedidosEntregues(inicio, fim);
+        const pedidos = semFiado(await this.consulta.listarPedidosEntregues(inicio, fim));
         const total = somarTotais(pedidos);
 
         // Quantidade vendida por produto, com o nome gravado no pedido.
