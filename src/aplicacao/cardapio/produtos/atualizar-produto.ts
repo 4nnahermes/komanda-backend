@@ -46,6 +46,7 @@ export class AtualizarProduto {
         if (alteracoes.ativo !== undefined) campos.ativo = produto.ativo;
         if (alteracoes.ingredientes !== undefined) campos.ingredientes = produto.ingredientes;
         if (alteracoes.adicionais !== undefined) campos.adicionais = produto.adicionais;
+        if (alteracoes.opcoes !== undefined) campos.opcoes = produto.opcoes;
         return campos;
     }
 
@@ -57,6 +58,7 @@ export class AtualizarProduto {
         if (alteracoes.ativo !== undefined) produto.definirAtivo(alteracoes.ativo);
         if (alteracoes.ingredientes !== undefined) produto.alterarIngredientes(alteracoes.ingredientes);
         if (alteracoes.adicionais !== undefined) produto.alterarAdicionais(alteracoes.adicionais);
+        if (alteracoes.opcoes !== undefined) produto.alterarOpcoes(alteracoes.opcoes);
     }
 
     private async garantirCategoriaExistente(produto: Produto, alteracoes: AlteracoesProduto): Promise<void> {

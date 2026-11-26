@@ -67,6 +67,8 @@ export interface ItemPedido {
     precoUnitario: Dinheiro;
     ingredientesRetirados: string[];
     adicionais: AdicionalDoItem[];
+    // Opções escolhidas de uma bebida. Cada opção é uma unidade (Coca-Cola e Guaraná = 2 bebidas).
+    opcoes: string[];
 }
 
 export interface BairroDoPedido extends Referencia {
@@ -108,10 +110,15 @@ export interface PedidoSalvo {
     prazoMinutos?: number | null;
 }
 
-// (preço unitário + adicionais) × quantidade.
+// Unidades vendidas do item: a quantidade vezes as opções escolhidas (ao menos uma).
+export function unidadesDoItem(item: Pick<ItemPedido, "quantidade" | "opcoes">): number {
+    return item.quantidade * Math.max(1, item.opcoes.length);
+}
+
+// (preço unitário + adicionais) × unidades.
 export function subtotalDoItem(item: ItemPedido): Dinheiro {
     const unitario = item.adicionais.reduce((soma, adicional) => soma.somar(adicional.preco), item.precoUnitario);
-    return unitario.multiplicar(item.quantidade);
+    return unitario.multiplicar(unidadesDoItem(item));
 }
 
 // Monta o item a partir do produto do cardápio, conferindo se os ingredientes
@@ -122,11 +129,12 @@ export function criarItem(
     quantidade: number,
     ingredientesRetirados: string[] = [],
     adicionais: string[] = [],
+    opcoes: string[] = [],
 ): ItemPedido {
     if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > QUANTIDADE_MAXIMA) {
         throw new ErroDeValidacao(MENSAGENS_PEDIDO.quantidadeInvalida);
     }
-    if (temRepetidos(ingredientesRetirados) || temRepetidos(adicionais)) {
+    if (temRepetidos(ingredientesRetirados) || temRepetidos(adicionais) || temRepetidos(opcoes)) {
         throw new ErroDeValidacao(MENSAGENS_PEDIDO.itemRepetido);
     }
 
@@ -142,6 +150,12 @@ export function criarItem(
         return { nome: encontrado.nome, preco: encontrado.preco };
     });
 
+    const escolhidas = opcoes.map((nome) => {
+        const encontrada = produto.opcoes.find((opcao) => mesmaPalavra(opcao, nome));
+        if (!encontrada) throw new ErroDeValidacao(`Opção "${nome.trim()}" não pertence ao produto "${produto.nome}"`);
+        return encontrada;
+    });
+
     return {
         produtoId: produto.id,
         nome: produto.nome,
@@ -149,6 +163,7 @@ export function criarItem(
         precoUnitario: produto.preco,
         ingredientesRetirados: retirados,
         adicionais: extras,
+        opcoes: escolhidas,
     };
 }
 
@@ -282,6 +297,7 @@ function copiarItem(item: ItemPedido): ItemPedido {
     return {
         ...item,
         ingredientesRetirados: [...item.ingredientesRetirados],
+        opcoes: [...(item.opcoes ?? [])],
         adicionais: item.adicionais.map((adicional) => ({ ...adicional })),
     };
 }

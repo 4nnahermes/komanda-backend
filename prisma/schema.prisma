@@ -14,15 +14,24 @@ model Contador {
   @@map("contadores")
 }
 
+enum TipoCategoria {
+  ALIMENTO
+  BEBIDA
+}
+
 model Categoria {
   id Int @id @map("_id")
   nome String
   nomeNormalizado String @unique
   ordem Int
   ativo Boolean @default(true)
+  // ALIMENTO tem acompanhamentos e adicionais; BEBIDA tem opções (sabores, marcas).
+  // Ausente em categorias antigas: vale como ALIMENTO.
+  tipo TipoCategoria?
   // Base que vale para todos os produtos da categoria.
   ingredientes String[]
   adicionais Adicional[]
+  opcoes String[]
   produtos Produto[]
   @@index([ordem, id])
   @@map("categorias")
@@ -44,6 +53,7 @@ model Produto {
   categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ingredientes String[]
   adicionais Adicional[]
+  opcoes String[]
   @@unique([categoriaId, nomeNormalizado])
   @@index([ativo, categoriaId])
   @@map("produtos")
@@ -110,6 +120,8 @@ type ItemPedido {
   precoUnitarioCentavos BigInt
   ingredientesRetirados String[]
   adicionais AdicionalItemPedido[]
+  // Opções escolhidas de uma bebida; cada uma é uma unidade.
+  opcoes String[]
 }
 
 model Pedido {

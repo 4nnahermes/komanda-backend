@@ -7,6 +7,7 @@ export interface ItemPedidoDto {
     precoUnitario: number;
     ingredientesRetirados: string[];
     adicionais: Array<{ nome: string; preco: number }>;
+    opcoes: string[];
     subtotal: number;
 }
 
@@ -52,6 +53,7 @@ export function paraPedidoDto(pedido: Pedido): PedidoDto {
             precoUnitario: item.precoUnitario.emReais,
             ingredientesRetirados: item.ingredientesRetirados,
             adicionais: item.adicionais.map((adicional) => ({ nome: adicional.nome, preco: adicional.preco.emReais })),
+            opcoes: item.opcoes,
             subtotal: subtotalDoItem(item).emReais,
         })),
         subtotal: pedido.subtotal.emReais,

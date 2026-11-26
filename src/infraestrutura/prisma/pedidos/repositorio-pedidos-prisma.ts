@@ -34,6 +34,7 @@ export class RepositorioPedidosPrisma implements RepositorioPedidos {
                             nome: adicional.nome,
                             precoCentavos: BigInt(adicional.preco.centavos),
                         })),
+                        opcoes: item.opcoes,
                     })),
                     taxaEntregaCentavos: BigInt(pedido.taxaEntrega.centavos),
                     formaPagamento: pedido.formaPagamento,
@@ -97,6 +98,8 @@ export function paraDominio(registro: RegistroPedido): Pedido {
             precoUnitario: dinheiro(item.precoUnitarioCentavos),
             ingredientesRetirados: item.ingredientesRetirados,
             adicionais: item.adicionais.map((adicional) => ({ nome: adicional.nome, preco: dinheiro(adicional.precoCentavos) })),
+            // Pedidos antigos não têm o campo gravado.
+            opcoes: item.opcoes ?? [],
         })),
         taxaEntrega: dinheiro(registro.taxaEntregaCentavos),
         formaPagamento: registro.formaPagamento,

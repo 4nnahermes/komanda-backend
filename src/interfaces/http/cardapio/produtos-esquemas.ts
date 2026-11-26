@@ -32,6 +32,10 @@ const adicionais = z.array(adicional, { error: "Os adicionais devem ser uma list
     { error: "Os nomes dos adicionais não podem se repetir" },
 );
 
+const opcoes = z.array(z.string({ error: "Cada opção deve ser um texto" }).trim().min(1, { error: "Cada opção deve ter um nome" }).max(100, { error: "Cada opção deve ter no máximo 100 caracteres" }), { error: "As opções devem ser uma lista de textos" })
+    .max(50, { error: "Informe até 50 opções" })
+    .refine((valores) => new Set(valores.map((v) => v.toLocaleLowerCase("pt-BR"))).size === valores.length, { error: "As opções não podem se repetir" });
+
 const corpoInvalido = { error: "O corpo da requisição deve ser um objeto JSON" };
 
 export const esquemaNovoProduto = z.object(
@@ -42,6 +46,7 @@ export const esquemaNovoProduto = z.object(
         descricao: descricao.optional(),
         ingredientes: ingredientes.optional(),
         adicionais: adicionais.optional(),
+        opcoes: opcoes.optional(),
     },
     corpoInvalido,
 );
@@ -55,6 +60,7 @@ export const esquemaAlteracoesProduto = z.object(
         ativo: ativo.optional(),
         ingredientes: ingredientes.optional(),
         adicionais: adicionais.optional(),
+        opcoes: opcoes.optional(),
     },
     corpoInvalido,
 );

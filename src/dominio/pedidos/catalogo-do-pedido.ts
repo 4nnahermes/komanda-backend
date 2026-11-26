@@ -8,6 +8,8 @@ export interface ProdutoParaPedido {
     nome: string;
     preco: Dinheiro;
     ingredientes: string[];
+    // Opções de bebida (sabores, marcas). Vazio em alimentos.
+    opcoes: string[];
     adicionais: Array<{ nome: string; preco: Dinheiro }>;
     // Produto ativo e de categoria ativa.
     disponivel: boolean;

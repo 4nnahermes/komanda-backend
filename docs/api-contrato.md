@@ -46,8 +46,10 @@ Todo erro devolve o código HTTP adequado e um corpo com a mensagem, pronta para
   "nome": "Xis",
   "ordem": 1,
   "ativo": true,
+  "tipo": "ALIMENTO",
   "ingredientes": ["Alface", "Tomate", "Milho"],
-  "adicionais": [{ "nome": "Bacon", "preco": 5 }, { "nome": "Ovo", "preco": 3 }]
+  "adicionais": [{ "nome": "Bacon", "preco": 5 }, { "nome": "Ovo", "preco": 3 }],
+  "opcoes": []
 }
 ```
 
@@ -57,8 +59,14 @@ Todo erro devolve o código HTTP adequado e um corpo com a mensagem, pronta para
 | `nome` | texto | obrigatório, 1 a 60 caracteres, único (sem diferenciar maiúsculas) |
 | `ordem` | número | posição no cardápio, começando em 1 |
 | `ativo` | booleano | `true` ao criar |
+| `tipo` | texto | `ALIMENTO` ou `BEBIDA`. `ALIMENTO` ao criar. Categorias antigas, sem o campo, valem como `ALIMENTO` |
 | `ingredientes` | lista de textos | acompanhamentos base que o atendente pode tirar. Mesmas regras do produto. Opcional no `POST` e no `PATCH`; vazio por padrão |
 | `adicionais` | lista de `{ nome, preco }` | adicionais pagos base. Mesmas regras do produto. Opcional no `POST` e no `PATCH`; vazio por padrão |
+| `opcoes` | lista de textos | opções base de bebida, como sabores ou marcas. Só nome, até 100 caracteres, sem repetir. Vazio por padrão |
+
+> **Tipo da categoria.** Alimento tem acompanhamentos e adicionais; bebida tem só opções. Enviar opções para alimento, ou acompanhamentos e adicionais para bebida, responde 400. Ao trocar o tipo, a base do outro tipo é apagada.
+>
+> **Opções no pedido.** O item de bebida recebe `opcoes`, com nomes das opções da categoria ou do produto. Cada opção escolhida é uma unidade: um "Refrigerante lata" com Coca-Cola e Guaraná cobra duas bebidas. O subtotal do item é preço × quantidade × número de opções (ao menos 1). O produto também aceita `opcoes` no `POST` e no `PATCH`.
 
 > **Base da categoria e personalização do produto.** Os acompanhamentos e adicionais da categoria valem para todos os produtos dela. O produto guarda só o que é dele. No pedido, valem os da categoria mais os do produto, sem repetir. Se o produto tiver um adicional com o mesmo nome de um da categoria, vale o preço do produto. `GET /api/produtos` devolve só os itens próprios do produto; quem monta a tela de pedido junta com os da categoria.
 

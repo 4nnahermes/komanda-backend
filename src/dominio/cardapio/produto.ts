@@ -1,6 +1,6 @@
 import { Dinheiro } from "../compartilhado/dinheiro";
 import { ErroDeValidacao } from "../compartilhado/erros";
-import { AdicionalEmCentavos, AdicionalProduto, validarAdicionais, validarIngredientes } from "./acompanhamentos";
+import { AdicionalEmCentavos, AdicionalProduto, validarAdicionais, validarIngredientes, validarOpcoes } from "./acompanhamentos";
 
 export type { AdicionalProduto } from "./acompanhamentos";
 
@@ -15,6 +15,7 @@ export interface AlteracoesProduto {
     ativo?: boolean;
     ingredientes?: string[];
     adicionais?: AdicionalProduto[];
+    opcoes?: string[];
 }
 
 export interface NovoProduto {
@@ -25,6 +26,7 @@ export interface NovoProduto {
     categoriaId: number;
     ingredientes?: string[];
     adicionais?: AdicionalProduto[];
+    opcoes?: string[];
 }
 
 export interface ProdutoSalvo {
@@ -36,6 +38,7 @@ export interface ProdutoSalvo {
     ativo: boolean;
     ingredientes: string[];
     adicionais: AdicionalProduto[];
+    opcoes?: string[];
 }
 
 // Produto do cardápio (Requisito 4). Sempre pertence a uma categoria.
@@ -52,6 +55,7 @@ export class Produto {
         private _ativo: boolean,
         private _ingredientes: string[],
         private _adicionais: AdicionalEmCentavos[],
+        private _opcoes: string[],
     ) {}
 
     static criar(dados: NovoProduto): Produto {
@@ -64,6 +68,7 @@ export class Produto {
             true,
             validarIngredientes(dados.ingredientes ?? []),
             validarAdicionais(dados.adicionais ?? []),
+            validarOpcoes(dados.opcoes ?? []),
         );
     }
 
@@ -72,6 +77,7 @@ export class Produto {
         return new Produto(
             dados.id, dados.nome, dados.descricao, dados.preco, dados.categoriaId, dados.ativo,
             validarIngredientes(dados.ingredientes ?? []), validarAdicionais(dados.adicionais ?? []),
+            validarOpcoes(dados.opcoes ?? []),
         );
     }
 
@@ -101,6 +107,14 @@ export class Produto {
 
     get adicionais(): AdicionalProduto[] {
         return this._adicionais.map(({ nome, centavos }) => ({ nome, preco: Dinheiro.deCentavos(centavos).emReais }));
+    }
+
+    get opcoes(): string[] {
+        return [...this._opcoes];
+    }
+
+    alterarOpcoes(opcoes: string[]): void {
+        this._opcoes = validarOpcoes(opcoes);
     }
 
     alterarIngredientes(ingredientes: string[]): void {

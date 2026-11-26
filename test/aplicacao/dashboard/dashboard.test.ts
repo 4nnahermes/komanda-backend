@@ -45,6 +45,14 @@ describe("ConsultarMetricas", () => {
         ]);
     });
 
+    it("conta cada opção de bebida como uma unidade vendida", async () => {
+        const banco = new DashboardEmMemoria();
+        banco.categorias.set(20, { id: 2, nome: "Bebidas" });
+        banco.adicionarPedido({ noite: "2026-11-17", itens: [{ ...refri, quantidade: 1, opcoes: ["Coca-Cola", "Guaraná"] }], formaPagamento: "PIX" });
+        const metricas = await new ConsultarMetricas(banco, AGORA).executar({});
+        expect(metricas).toMatchObject({ totalVendido: 12, produtoMaisVendido: { id: 20, quantidade: 2 } });
+    });
+
     it("soma as noites do período", async () => {
         const metricas = await new ConsultarMetricas(dados(), AGORA).executar({ inicio: "2026-11-16", fim: "2026-11-17" });
         expect(metricas.pedidos).toBe(3);
