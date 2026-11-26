@@ -47,6 +47,7 @@ export class RepositorioProdutosPrisma implements RepositorioProdutos {
                             nome: adicional.nome,
                             precoCentavos: centavosParaBanco(adicional.preco),
                         })),
+                        opcoes: produto.opcoes,
                     },
                 });
                 return id;
@@ -68,6 +69,7 @@ export class RepositorioProdutosPrisma implements RepositorioProdutos {
         if (campos.ativo !== undefined) dados.ativo = campos.ativo;
         if (campos.categoriaId !== undefined) dados.categoriaId = campos.categoriaId;
         if (campos.ingredientes !== undefined) dados.ingredientes = campos.ingredientes;
+        if (campos.opcoes !== undefined) dados.opcoes = campos.opcoes;
         if (campos.adicionais !== undefined) {
             dados.adicionais = campos.adicionais.map((adicional) => ({
                 nome: adicional.nome,
@@ -107,5 +109,6 @@ function paraDominio(produto: Prisma.ProdutoGetPayload<{ include: { categoria: t
         ativo: produto.ativo,
         ingredientes: produto.ingredientes,
         adicionais: produto.adicionais.map((adicional) => ({ nome: adicional.nome, preco: reaisDoBanco(adicional.precoCentavos) })),
+        opcoes: produto.opcoes ?? [],
     });
 }

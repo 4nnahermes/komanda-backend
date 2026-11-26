@@ -11,6 +11,7 @@ export interface ItemNovoPedido {
     quantidade: number;
     ingredientesRetirados?: string[];
     adicionais?: string[];
+    opcoes?: string[];
 }
 
 export interface DadosNovoPedido {
@@ -42,7 +43,7 @@ export class CriarPedido {
         for (const item of dados.itens) {
             const produto = await this.catalogo.buscarProduto(item.produtoId);
             if (!produto || !produto.disponivel) throw new ErroDeValidacao(MENSAGENS.produtoIndisponivel);
-            itens.push(criarItem(produto, item.quantidade, item.ingredientesRetirados, item.adicionais));
+            itens.push(criarItem(produto, item.quantidade, item.ingredientesRetirados, item.adicionais, item.opcoes));
         }
 
         const bairro = await this.buscarBairro(dados);

@@ -11,6 +11,7 @@ export interface ProdutoDetalhado {
     categoria: CategoriaResumida;
     ingredientes: string[];
     adicionais: AdicionalProduto[];
+    opcoes: string[];
 }
 
 export interface FiltroProdutos {

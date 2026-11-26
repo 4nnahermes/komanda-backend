@@ -7,6 +7,7 @@ const mensagemProduto = "Produto não encontrado ou indisponível";
 const mensagemItens = "Informe ao menos um item";
 const mensagemRetirados = "Os ingredientes retirados devem ser uma lista de textos";
 const mensagemAdicionais = "Os adicionais devem ser uma lista de textos";
+const mensagemOpcoes = "As opções devem ser uma lista de textos";
 const mensagemStatus = "O status deve ser EM_PREPARO, PRONTO, ENTREGUE ou CANCELADO";
 
 // Só confere tipos e formatos. As regras do pedido (bairro só na entrega,
@@ -16,6 +17,7 @@ const item = z.object({
     quantidade: z.number({ error: mensagemQuantidade }).int(mensagemQuantidade).min(1, mensagemQuantidade).max(99, mensagemQuantidade),
     ingredientesRetirados: z.array(z.string({ error: mensagemRetirados }), { error: mensagemRetirados }).optional(),
     adicionais: z.array(z.string({ error: mensagemAdicionais }), { error: mensagemAdicionais }).optional(),
+    opcoes: z.array(z.string({ error: mensagemOpcoes }), { error: mensagemOpcoes }).optional(),
 }, { error: mensagemItens });
 
 export const esquemaNovoPedido = z.object({

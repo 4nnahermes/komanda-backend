@@ -117,6 +117,7 @@ export class CardapioEmMemoria {
             categoria: { id: categoria.id, nome: categoria.nome },
             ingredientes: produto.ingredientes,
             adicionais: produto.adicionais,
+            opcoes: produto.opcoes,
         };
     }
 }

@@ -32,6 +32,7 @@ describe("casos de uso de produtos", () => {
                 categoria: { id: 1, nome: "Xis" },
                 ingredientes: [],
                 adicionais: [],
+                opcoes: [],
             });
         });
 

@@ -42,8 +42,8 @@ describe("API de pedidos", () => {
             id: 1, numero: 1, noite: "2026-11-17", criadoEm: AGORA.toISOString(), tipo: "ENTREGA", status: "EM_PREPARO",
             nomeCliente: "João", telefone: "(51) 99654-2210", bairro: { id: 2, nome: "Centro" }, endereco: "R. Sete de Setembro, 410",
             itens: [
-                { produtoId: 10, nome: "Xis Salada", quantidade: 2, precoUnitario: 28, ingredientesRetirados: ["Tomate"], adicionais: [{ nome: "Bacon", preco: 5 }], subtotal: 66 },
-                { produtoId: 20, nome: "Refrigerante lata", quantidade: 1, precoUnitario: 6, ingredientesRetirados: [], adicionais: [], subtotal: 6 },
+                { produtoId: 10, nome: "Xis Salada", quantidade: 2, precoUnitario: 28, ingredientesRetirados: ["Tomate"], adicionais: [{ nome: "Bacon", preco: 5 }], opcoes: [], subtotal: 66 },
+                { produtoId: 20, nome: "Refrigerante lata", quantidade: 1, precoUnitario: 6, ingredientesRetirados: [], adicionais: [], opcoes: [], subtotal: 6 },
             ],
             subtotal: 72, taxaEntrega: 5, total: 77, formaPagamento: "DINHEIRO", valorRecebido: 100, troco: 23, motoboy: null, prazoMinutos: null,
         });

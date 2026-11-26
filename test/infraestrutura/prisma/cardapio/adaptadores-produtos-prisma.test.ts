@@ -59,7 +59,7 @@ describe("adaptadores Prisma de produtos e cardápio", () => {
         expect(prisma.$transaction).toHaveBeenCalledOnce();
         expect(tx.produto.create).toHaveBeenCalledWith({ data: {
             id: 42, nome: "Xis Carne", nomeNormalizado: "xis carne", descricao: null, precoCentavos: 3290n,
-            ativo: true, categoriaId: 3, ingredientes: ["cebola"], adicionais: [{ nome: "Queijo extra", precoCentavos: 410n }],
+            ativo: true, categoriaId: 3, ingredientes: ["cebola"], adicionais: [{ nome: "Queijo extra", precoCentavos: 410n }], opcoes: [],
         } });
     });
 

@@ -43,6 +43,7 @@ describe("API de produtos", () => {
             categoria: { id: 1, nome: "Xis" },
             ingredientes: [],
             adicionais: [],
+            opcoes: [],
         });
     });
 

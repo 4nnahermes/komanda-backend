@@ -2,7 +2,7 @@ import { ConsultaDashboard, MotoboyDoAcerto, Referencia } from "../../src/aplica
 import { Dinheiro } from "../../src/dominio/compartilhado/dinheiro";
 import { FormaPagamento, Pedido, StatusPedido } from "../../src/dominio/pedidos/pedido";
 
-interface ItemSimples { produtoId: number; nome: string; quantidade: number; preco: number }
+interface ItemSimples { produtoId: number; nome: string; quantidade: number; preco: number; opcoes?: string[] }
 
 export class DashboardEmMemoria implements ConsultaDashboard {
     readonly pedidos: Pedido[] = [];
@@ -20,7 +20,7 @@ export class DashboardEmMemoria implements ConsultaDashboard {
             nomeCliente: "Cliente", telefone: null, bairro: entrega ? { id: 1, nome: "Centro" } : null, endereco: entrega ? "Rua A" : null,
             itens: dados.itens.map((item) => ({
                 produtoId: item.produtoId, nome: item.nome, quantidade: item.quantidade,
-                precoUnitario: Dinheiro.deReais(item.preco), ingredientesRetirados: [], adicionais: [],
+                precoUnitario: Dinheiro.deReais(item.preco), ingredientesRetirados: [], adicionais: [], opcoes: item.opcoes ?? [],
             })),
             taxaEntrega: Dinheiro.deReais(dados.taxa ?? 0), formaPagamento: dados.formaPagamento ?? "PIX",
             valorRecebido: null, motoboy: dados.motoboy ?? null,

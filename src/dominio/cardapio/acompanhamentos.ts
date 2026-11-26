@@ -54,6 +54,34 @@ export function validarAdicionais(valores: AdicionalProduto[]): AdicionalEmCenta
     });
 }
 
+export const TIPOS_CATEGORIA = ["ALIMENTO", "BEBIDA"] as const;
+export type TipoCategoria = (typeof TIPOS_CATEGORIA)[number];
+
+const LIMITE_OPCOES = 50;
+const TAMANHO_OPCAO = 100;
+
+// Opções de uma bebida, como sabores ou marcas. Só nome, sem preço próprio.
+export function validarOpcoes(valores: string[]): string[] {
+    if (!Array.isArray(valores)) throw new ErroDeValidacao("As opções devem ser uma lista de textos");
+    if (valores.length > LIMITE_OPCOES) throw new ErroDeValidacao(`Informe até ${LIMITE_OPCOES} opções`);
+    const vistas = new Set<string>();
+    return valores.map((valor) => {
+        if (typeof valor !== "string") throw new ErroDeValidacao("Cada opção deve ser um texto");
+        const texto = valor.trim();
+        if (!texto) throw new ErroDeValidacao("Cada opção deve ter um nome");
+        if (texto.length > TAMANHO_OPCAO) throw new ErroDeValidacao(`Cada opção deve ter no máximo ${TAMANHO_OPCAO} caracteres`);
+        const chave = texto.toLocaleLowerCase("pt-BR");
+        if (vistas.has(chave)) throw new ErroDeValidacao("As opções não podem se repetir");
+        vistas.add(chave);
+        return texto;
+    });
+}
+
+// Opções da categoria primeiro, depois as do produto, sem repetir.
+export function unirOpcoes(daCategoria: string[], doProduto: string[]): string[] {
+    return combinarComCategoria({ ingredientes: daCategoria, adicionais: [] }, { ingredientes: doProduto, adicionais: [] }).ingredientes;
+}
+
 // Junta a base da categoria com o que é próprio do produto.
 // Acompanhamentos: os da categoria primeiro, sem repetir (sem diferenciar maiúsculas).
 // Adicionais: um adicional do produto com o mesmo nome de um da categoria substitui o preço dele.

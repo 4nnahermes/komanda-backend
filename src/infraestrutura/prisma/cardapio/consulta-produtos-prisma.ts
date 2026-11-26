@@ -24,7 +24,7 @@ export class ConsultaProdutosPrisma implements ConsultaProdutos {
 
 export function paraDetalhado(registro: {
     id: number; nome: string; descricao: string | null; precoCentavos: bigint; ativo: boolean;
-    ingredientes: string[]; adicionais: { nome: string; precoCentavos: bigint }[];
+    ingredientes: string[]; adicionais: { nome: string; precoCentavos: bigint }[]; opcoes?: string[];
     categoria: { id: number; nome: string; ordem: number };
 }): ProdutoDetalhado {
     return {
@@ -36,5 +36,6 @@ export function paraDetalhado(registro: {
         categoria: { id: registro.categoria.id, nome: registro.categoria.nome },
         ingredientes: registro.ingredientes,
         adicionais: registro.adicionais.map((adicional) => ({ nome: adicional.nome, preco: reaisDoBanco(adicional.precoCentavos) })),
+        opcoes: registro.opcoes ?? [],
     };
 }

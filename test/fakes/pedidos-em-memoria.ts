@@ -59,11 +59,12 @@ export class CatalogoEmMemoria implements CatalogoDoPedido {
     readonly bairros = new Map<number, BairroParaPedido>();
     readonly motoboys = new Map<number, MotoboyParaPedido>();
 
-    adicionarProduto(id: number, nome: string, preco: number, extras: { ingredientes?: string[]; adicionais?: Array<{ nome: string; preco: number }>; disponivel?: boolean } = {}): void {
+    adicionarProduto(id: number, nome: string, preco: number, extras: { ingredientes?: string[]; adicionais?: Array<{ nome: string; preco: number }>; opcoes?: string[]; disponivel?: boolean } = {}): void {
         this.produtos.set(id, {
             id, nome, preco: Dinheiro.deReais(preco),
             ingredientes: extras.ingredientes ?? [],
             adicionais: (extras.adicionais ?? []).map((a) => ({ nome: a.nome, preco: Dinheiro.deReais(a.preco) })),
+            opcoes: extras.opcoes ?? [],
             disponivel: extras.disponivel ?? true,
         });
     }

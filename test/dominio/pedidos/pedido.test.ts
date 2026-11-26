@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import { Dinheiro } from "../../../src/dominio/compartilhado/dinheiro";
 import { ConflitoDeDados, ErroDeValidacao } from "../../../src/dominio/compartilhado/erros";
 import { ProdutoParaPedido } from "../../../src/dominio/pedidos/catalogo-do-pedido";
-import { NovoPedido, Pedido, criarItem } from "../../../src/dominio/pedidos/pedido";
+import { NovoPedido, Pedido, criarItem, subtotalDoItem, unidadesDoItem } from "../../../src/dominio/pedidos/pedido";
 
 const xis: ProdutoParaPedido = {
     id: 10, nome: "Xis Salada", preco: Dinheiro.deReais(28), ingredientes: ["Tomate", "Alface"],
-    adicionais: [{ nome: "Bacon", preco: Dinheiro.deReais(5) }], disponivel: true,
+    adicionais: [{ nome: "Bacon", preco: Dinheiro.deReais(5) }], opcoes: [], disponivel: true,
+};
+
+const refri: ProdutoParaPedido = {
+    id: 20, nome: "Refrigerante lata", preco: Dinheiro.deReais(8), ingredientes: [], adicionais: [],
+    opcoes: ["Coca-Cola", "Guaraná"], disponivel: true,
 };
 
 function novo(dados: Partial<NovoPedido> = {}): NovoPedido {
@@ -65,4 +70,21 @@ describe("Pedido", () => {
         pedido.alterarStatus("CANCELADO");
         expect(() => pedido.garantirQuePodeExcluir()).toThrow("Só é possível excluir um pedido em preparo. Cancele o pedido");
     });
+
+describe("opções de bebida", () => {
+    it("cada opção escolhida é uma unidade: Coca-Cola e Guaraná custam duas bebidas", () => {
+        const item = criarItem(refri, 1, [], [], ["coca-cola", "Guaraná"]);
+        expect(item.opcoes).toEqual(["Coca-Cola", "Guaraná"]);
+        expect(subtotalDoItem(item).emReais).toBe(16);
+        expect(unidadesDoItem(item)).toBe(2);
+        expect(subtotalDoItem(criarItem(refri, 3, [], [], ["Guaraná"])).emReais).toBe(24);
+        expect(subtotalDoItem(criarItem(refri, 1)).emReais).toBe(8);
+    });
+
+    it("recusa opção de outro produto ou repetida", () => {
+        expect(() => criarItem(refri, 1, [], [], ["Fanta"])).toThrow(ErroDeValidacao);
+        expect(() => criarItem(refri, 1, [], [], ["Guaraná", "guaraná"])).toThrow(ErroDeValidacao);
+        expect(() => criarItem(xis, 1, [], [], ["Coca-Cola"])).toThrow(ErroDeValidacao);
+    });
+});
 });

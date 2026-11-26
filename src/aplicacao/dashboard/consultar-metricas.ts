@@ -1,3 +1,4 @@
+import { unidadesDoItem } from "../../dominio/pedidos/pedido";
 import { Dinheiro } from "../../dominio/compartilhado/dinheiro";
 import { ErroDeValidacao } from "../../dominio/compartilhado/erros";
 import { noiteDe } from "../../dominio/pedidos/noite";
@@ -45,7 +46,7 @@ export class ConsultarMetricas {
         const produtos = new Map<number, ItemVendido>();
         for (const item of pedidos.flatMap((pedido) => pedido.itens)) {
             const atual = produtos.get(item.produtoId) ?? { id: item.produtoId, nome: item.nome, quantidade: 0 };
-            atual.quantidade += item.quantidade;
+            atual.quantidade += unidadesDoItem(item);
             produtos.set(item.produtoId, atual);
         }
         const ranking = [...produtos.values()].sort(porQuantidadeENome);
