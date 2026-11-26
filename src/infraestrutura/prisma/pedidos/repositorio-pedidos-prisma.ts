@@ -5,7 +5,7 @@ import { FiltroPedidos, RepositorioPedidos } from "../../../dominio/pedidos/repo
 import { emTransacao, proximoId } from "../compartilhado";
 
 export class RepositorioPedidosPrisma implements RepositorioPedidos {
-    constructor(private readonly prisma: PrismaClient) {}
+    constructor(private readonly prisma: PrismaClient) { }
 
     async criar(pedido: Pedido): Promise<Pedido> {
         const registro = await emTransacao(this.prisma, async (tx) => {
@@ -39,6 +39,7 @@ export class RepositorioPedidosPrisma implements RepositorioPedidos {
                     formaPagamento: pedido.formaPagamento,
                     valorRecebidoCentavos: pedido.valorRecebido ? BigInt(pedido.valorRecebido.centavos) : null,
                     motoboy: null,
+                    prazoMinutos: pedido.prazoMinutos,
                 },
             });
         });
@@ -101,5 +102,6 @@ export function paraDominio(registro: RegistroPedido): Pedido {
         formaPagamento: registro.formaPagamento,
         valorRecebido: registro.valorRecebidoCentavos === null ? null : dinheiro(registro.valorRecebidoCentavos),
         motoboy: registro.motoboy ? { id: registro.motoboy.id, nome: registro.motoboy.nome } : null,
+        prazoMinutos: registro.prazoMinutos ?? null,
     });
 }

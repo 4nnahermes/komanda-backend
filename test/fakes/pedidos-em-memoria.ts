@@ -50,7 +50,7 @@ function copiar(pedido: Pedido, id: number, numero: number): Pedido {
         noite: pedido.noite, criadoEm: pedido.criadoEm, tipo: pedido.tipo, status: pedido.status,
         nomeCliente: pedido.nomeCliente, telefone: pedido.telefone, bairro: pedido.bairro, endereco: pedido.endereco,
         itens: pedido.itens, taxaEntrega: pedido.taxaEntrega, formaPagamento: pedido.formaPagamento,
-        valorRecebido: pedido.valorRecebido, motoboy: pedido.motoboy,
+        valorRecebido: pedido.valorRecebido, motoboy: pedido.motoboy, prazoMinutos: pedido.prazoMinutos,
     });
 }
 

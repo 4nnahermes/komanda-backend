@@ -30,6 +30,7 @@ export interface PedidoDto {
     valorRecebido: number | null;
     troco: number | null;
     motoboy: Referencia | null;
+    prazoMinutos: number | null;
 }
 
 export function paraPedidoDto(pedido: Pedido): PedidoDto {
@@ -60,5 +61,6 @@ export function paraPedidoDto(pedido: Pedido): PedidoDto {
         valorRecebido: pedido.valorRecebido?.emReais ?? null,
         troco: pedido.troco?.emReais ?? null,
         motoboy: pedido.motoboy,
+        prazoMinutos: pedido.prazoMinutos,
     };
 }

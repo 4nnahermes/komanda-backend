@@ -22,6 +22,8 @@ export interface DadosNovoPedido {
     itens: ItemNovoPedido[];
     formaPagamento: FormaPagamento;
     valorRecebido?: number | null;
+    // Tempo de espera vigente, em minutos.
+    prazoMinutos?: number | null;
 }
 
 // Registra o pedido com os preços e a taxa vigentes no cadastro (RN5).
@@ -54,6 +56,7 @@ export class CriarPedido {
             itens,
             formaPagamento: dados.formaPagamento,
             valorRecebido: dados.valorRecebido,
+            prazoMinutos: dados.prazoMinutos,
             criadoEm,
             noite: noiteDe(criadoEm),
         });

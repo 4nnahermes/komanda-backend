@@ -27,6 +27,7 @@ export const esquemaNovoPedido = z.object({
     itens: z.array(item, { error: mensagemItens }).min(1, mensagemItens).max(50, "O pedido pode ter no máximo 50 itens"),
     formaPagamento: z.enum(FORMAS_PAGAMENTO, { error: "A forma de pagamento deve ser PIX, CREDITO, DEBITO, DINHEIRO ou FIADO" }),
     valorRecebido: z.number({ error: "O valor recebido deve ser um número com até 2 casas decimais" }).nullable().optional(),
+    prazoMinutos: z.number({ error: "O prazo deve ser um número inteiro de 1 a 600 minutos" }).nullable().optional(),
 }, objeto);
 
 export const esquemaStatusPedido = z.object({
