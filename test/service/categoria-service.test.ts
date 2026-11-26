@@ -99,7 +99,7 @@ describe("CategoriaService com persistência Prisma", () => {
         await servico.inserir({ nome: "Bebidas" });
         const criada = await servico.inserir({ nome: "Bauru", ordem: 2 });
 
-        expect(criada).toEqual({ id: 3, nome: "Bauru", ordem: 2, ativo: true });
+        expect(criada).toEqual({ id: 3, nome: "Bauru", ordem: 2, ativo: true, ingredientes: [], adicionais: [] });
         expect((await servico.listar()).map(({ nome }) => nome)).toEqual(["Xis", "Bauru", "Bebidas"]);
         await expect(servico.inserir({ nome: " bauru " })).rejects.toMatchObject({ status: 409 });
         await servico.atualizar(criada.id, { ativo: false });
@@ -113,7 +113,7 @@ describe("CategoriaService com persistência Prisma", () => {
         await servico.inserir({ nome: "Bebidas" });
         await servico.inserir({ nome: "Bauru" });
         const patch = await servico.atualizar(2, { nome: "Bebidas frias" });
-        expect(patch).toEqual({ id: 2, nome: "Bebidas frias", ordem: 2, ativo: true });
+        expect(patch).toEqual({ id: 2, nome: "Bebidas frias", ordem: 2, ativo: true, ingredientes: [], adicionais: [] });
         expect(categorias[1].ordem).toBe(2);
 
         const antes = await servico.listar();
@@ -123,6 +123,22 @@ describe("CategoriaService com persistência Prisma", () => {
 
         await servico.excluir(1);
         expect((await servico.listar()).map(({ ordem }) => ordem)).toEqual([1, 2]);
+    });
+
+    it("grava acompanhamentos e adicionais base, valida e aceita categoria antiga sem os campos", async () => {
+        const { servico, categorias } = criarServico();
+        const criada = await servico.inserir({ nome: "Xis", ingredientes: [" Alface ", "Tomate"], adicionais: [{ nome: "Bacon", preco: 5 }] });
+        expect(criada).toMatchObject({ ingredientes: ["Alface", "Tomate"], adicionais: [{ nome: "Bacon", preco: 5 }] });
+
+        const alterada = await servico.atualizar(criada.id, { adicionais: [{ nome: "Bacon", preco: 6 }, { nome: "Ovo", preco: 3 }] });
+        expect(alterada).toMatchObject({ ingredientes: ["Alface", "Tomate"], adicionais: [{ nome: "Bacon", preco: 6 }, { nome: "Ovo", preco: 3 }] });
+
+        await expect(servico.atualizar(criada.id, { ingredientes: ["Alface", "Alface"] })).rejects.toMatchObject({ status: 400 });
+        await expect(servico.atualizar(criada.id, { adicionais: [{ nome: "Bacon", preco: -1 }] })).rejects.toMatchObject({ status: 400 });
+
+        delete (categorias[0] as any).ingredientes;
+        delete (categorias[0] as any).adicionais;
+        expect(await servico.buscarPorId(criada.id)).toMatchObject({ ingredientes: [], adicionais: [] });
     });
 
     it("bloqueia exclusão com produtos e retorna 404 sem recriar registros", async () => {

@@ -45,7 +45,9 @@ Todo erro devolve o código HTTP adequado e um corpo com a mensagem, pronta para
   "id": 1,
   "nome": "Xis",
   "ordem": 1,
-  "ativo": true
+  "ativo": true,
+  "ingredientes": ["Alface", "Tomate", "Milho"],
+  "adicionais": [{ "nome": "Bacon", "preco": 5 }, { "nome": "Ovo", "preco": 3 }]
 }
 ```
 
@@ -55,8 +57,10 @@ Todo erro devolve o código HTTP adequado e um corpo com a mensagem, pronta para
 | `nome` | texto | obrigatório, 1 a 60 caracteres, único (sem diferenciar maiúsculas) |
 | `ordem` | número | posição no cardápio, começando em 1 |
 | `ativo` | booleano | `true` ao criar |
+| `ingredientes` | lista de textos | acompanhamentos base que o atendente pode tirar. Mesmas regras do produto. Opcional no `POST` e no `PATCH`; vazio por padrão |
+| `adicionais` | lista de `{ nome, preco }` | adicionais pagos base. Mesmas regras do produto. Opcional no `POST` e no `PATCH`; vazio por padrão |
 
-> Os ingredientes padrão da categoria (Requisito 3) entram quando o cadastro de ingredientes existir. Até lá, a categoria não tem esse campo.
+> **Base da categoria e personalização do produto.** Os acompanhamentos e adicionais da categoria valem para todos os produtos dela. O produto guarda só o que é dele. No pedido, valem os da categoria mais os do produto, sem repetir. Se o produto tiver um adicional com o mesmo nome de um da categoria, vale o preço do produto. `GET /api/produtos` devolve só os itens próprios do produto; quem monta a tela de pedido junta com os da categoria.
 
 ### `GET /api/categorias`
 
@@ -367,7 +371,6 @@ Lista prevista para orientar o frontend. Caminhos e campos serão detalhados, e 
 | Método | Rota | Descrição | Requisito |
 |---|---|---|---|
 | GET, POST, PATCH, DELETE | `/api/ingredientes` | Cadastro de ingredientes (unidade e estoque mínimo) | R2 |
-| GET, PATCH | `/api/categorias/:id/ingredientes-padrao` | Ingredientes padrão da categoria | R3 |
 | GET, PATCH | `/api/produtos/:id/ficha-tecnica` | Ficha técnica do produto | R5 |
 | GET, POST, PATCH, DELETE | `/api/grupos-complementos` | Grupos de complementos e produtos ligados | R6 |
 | GET, POST, PATCH, DELETE | `/api/grupos-complementos/:id/complementos` | Complementos de um grupo | R7 |
