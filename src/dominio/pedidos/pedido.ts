@@ -25,6 +25,7 @@ const QUANTIDADE_MAXIMA = 99;
 const TAMANHO_NOME_CLIENTE = 100;
 const TAMANHO_TELEFONE = 30;
 const TAMANHO_ENDERECO = 200;
+const PRAZO_MAXIMO = 600;
 
 export const MENSAGENS_PEDIDO = {
     nomeClienteObrigatorio: "O nome do cliente é obrigatório",
@@ -45,6 +46,7 @@ export const MENSAGENS_PEDIDO = {
     motoboyEmRetirada: "Pedido de retirada não tem motoboy",
     motoboyEmPedidoFinalizado: "Não é possível alterar o motoboy de um pedido entregue ou cancelado",
     exclusaoForaDoPreparo: "Só é possível excluir um pedido em preparo. Cancele o pedido",
+    prazoInvalido: `O prazo deve ser um número inteiro de 1 a ${PRAZO_MAXIMO} minutos`,
 } as const;
 
 export interface Referencia {
@@ -83,6 +85,8 @@ export interface NovoPedido {
     valorRecebido?: number | null;
     criadoEm: Date;
     noite: string;
+    // Tempo de espera vigente na criação; fica gravado e não muda depois.
+    prazoMinutos?: number | null;
 }
 
 export interface PedidoSalvo {
@@ -101,6 +105,7 @@ export interface PedidoSalvo {
     formaPagamento: FormaPagamento;
     valorRecebido: Dinheiro | null;
     motoboy: Referencia | null;
+    prazoMinutos?: number | null;
 }
 
 // (preço unitário + adicionais) × quantidade.
@@ -182,6 +187,7 @@ export class Pedido {
         readonly formaPagamento: FormaPagamento,
         readonly valorRecebido: Dinheiro | null,
         private _motoboy: Referencia | null,
+        readonly prazoMinutos: number | null,
     ) {}
 
     static criar(dados: NovoPedido): Pedido {
@@ -201,7 +207,7 @@ export class Pedido {
         return new Pedido(
             null, null, dados.noite, dados.criadoEm, dados.tipo, "EM_PREPARO",
             nomeCliente, telefone, bairro, endereco, itens, taxaEntrega,
-            dados.formaPagamento, valorRecebido, null,
+            dados.formaPagamento, valorRecebido, null, validarPrazo(dados.prazoMinutos ?? null),
         );
     }
 
@@ -210,7 +216,7 @@ export class Pedido {
         return new Pedido(
             dados.id, dados.numero, dados.noite, dados.criadoEm, dados.tipo, dados.status,
             dados.nomeCliente, dados.telefone, dados.bairro, dados.endereco, dados.itens.map(copiarItem),
-            dados.taxaEntrega, dados.formaPagamento, dados.valorRecebido, dados.motoboy,
+            dados.taxaEntrega, dados.formaPagamento, dados.valorRecebido, dados.motoboy, dados.prazoMinutos ?? null,
         );
     }
 
@@ -292,6 +298,12 @@ function validarTelefone(valor: string | null): string | null {
     const telefone = valor?.trim() ?? "";
     if (telefone.length > TAMANHO_TELEFONE) throw new ErroDeValidacao(MENSAGENS_PEDIDO.telefoneLongo);
     return telefone || null;
+}
+
+function validarPrazo(valor: number | null): number | null {
+    if (valor === null) return null;
+    if (!Number.isInteger(valor) || valor < 1 || valor > PRAZO_MAXIMO) throw new ErroDeValidacao(MENSAGENS_PEDIDO.prazoInvalido);
+    return valor;
 }
 
 function validarValorRecebido(valor: number | null, forma: FormaPagamento, total: Dinheiro): Dinheiro | null {

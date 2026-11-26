@@ -45,7 +45,7 @@ describe("API de pedidos", () => {
                 { produtoId: 10, nome: "Xis Salada", quantidade: 2, precoUnitario: 28, ingredientesRetirados: ["Tomate"], adicionais: [{ nome: "Bacon", preco: 5 }], subtotal: 66 },
                 { produtoId: 20, nome: "Refrigerante lata", quantidade: 1, precoUnitario: 6, ingredientesRetirados: [], adicionais: [], subtotal: 6 },
             ],
-            subtotal: 72, taxaEntrega: 5, total: 77, formaPagamento: "DINHEIRO", valorRecebido: 100, troco: 23, motoboy: null,
+            subtotal: 72, taxaEntrega: 5, total: 77, formaPagamento: "DINHEIRO", valorRecebido: 100, troco: 23, motoboy: null, prazoMinutos: null,
         });
     });
 
@@ -82,6 +82,22 @@ describe("API de pedidos", () => {
         const resposta = await apiCriada().post("/api/pedidos").send(corpo);
         expect(resposta.status).toBe(400);
         expect(resposta.body).toEqual({ erro: mensagem });
+    });
+
+    it("grava o prazo de cada pedido e não muda com os pedidos seguintes", async () => {
+        const api = apiCriada();
+        await api.post("/api/pedidos").send({ ...retirada, prazoMinutos: 30 });
+        await api.post("/api/pedidos").send({ ...retirada, prazoMinutos: 60 });
+        expect((await api.get("/api/pedidos/1")).body.prazoMinutos).toBe(30);
+        expect((await api.get("/api/pedidos/2")).body.prazoMinutos).toBe(60);
+        await api.patch("/api/pedidos/1/status").send({ status: "PRONTO" });
+        expect((await api.get("/api/pedidos")).body.map((p: { prazoMinutos: number }) => p.prazoMinutos)).toEqual([30, 60]);
+    });
+
+    it.each([0, 601, 12.5, "30"])("rejeita prazo inválido %j", async (prazoMinutos) => {
+        const resposta = await apiCriada().post("/api/pedidos").send({ ...retirada, prazoMinutos });
+        expect(resposta.status).toBe(400);
+        expect(resposta.body).toEqual({ erro: "O prazo deve ser um número inteiro de 1 a 600 minutos" });
     });
 
     it("exige motoboy para concluir a entrega", async () => {

@@ -127,6 +127,8 @@ model Pedido {
   formaPagamento FormaPagamento
   valorRecebidoCentavos BigInt?
   motoboy ReferenciaPedido?
+  // Tempo de espera (min) informado quando o pedido foi criado. Null em pedidos antigos.
+  prazoMinutos Int?
   @@unique([noite, numero])
   @@index([noite, status])
   @@map("pedidos")
