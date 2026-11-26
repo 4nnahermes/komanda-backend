@@ -25,7 +25,7 @@ export class CategoriaController {
     inserir = async (req: Request, res: Response) => {
         try {
             const corpo = req.body ?? {};
-            const categoria = await this.service.inserir({ nome: corpo.nome, ordem: corpo.ordem });
+            const categoria = await this.service.inserir({ nome: corpo.nome, ordem: corpo.ordem, ingredientes: corpo.ingredientes, adicionais: corpo.adicionais });
             res.status(201).json(categoria);
         } catch (erro) {
             responderErro(res, erro);
@@ -38,6 +38,8 @@ export class CategoriaController {
             const categoria = await this.service.atualizar(this.lerId(req), {
                 nome: corpo.nome,
                 ativo: corpo.ativo,
+                ingredientes: corpo.ingredientes,
+                adicionais: corpo.adicionais,
             });
             res.json(categoria);
         } catch (erro) {

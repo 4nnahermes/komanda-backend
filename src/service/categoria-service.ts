@@ -1,5 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { emTransacao, ehUnicidade, normalizarNome, proximoId } from "../infraestrutura/prisma/compartilhado";
+import { emTransacao, ehUnicidade, normalizarNome, proximoId, reaisDoBanco } from "../infraestrutura/prisma/compartilhado";
+import { AdicionalProduto, validarAdicionais, validarIngredientes } from "../dominio/cardapio/acompanhamentos";
+import { ErroDeValidacao } from "../dominio/compartilhado/erros";
 import { ErroApi } from "../utils/erro-api";
 
 const TAMANHO_MAXIMO_NOME = 60;
@@ -8,7 +10,9 @@ const MENSAGEM_CATEGORIA_NAO_ENCONTRADA = "Categoria não encontrada";
 const MENSAGEM_CATEGORIA_COM_PRODUTOS =
     "Não é possível excluir uma categoria com produtos. Exclua ou mova os produtos, ou desative a categoria";
 
-type CategoriaDTO = { id: number; nome: string; ordem: number; ativo: boolean };
+type CategoriaDTO = { id: number; nome: string; ordem: number; ativo: boolean; ingredientes: string[]; adicionais: AdicionalProduto[] };
+type AdicionalNoBanco = { nome: string; precoCentavos: bigint };
+type DadosAcompanhamentos = { ingredientes?: unknown; adicionais?: unknown };
 
 // Regras da US01 (Requisito 1), conforme docs/api-contrato.md, seção 2.
 export class CategoriaService {
@@ -29,8 +33,9 @@ export class CategoriaService {
         return paraDto(categoria);
     }
 
-    async inserir(dados: { nome?: unknown; ordem?: unknown }): Promise<CategoriaDTO> {
+    async inserir(dados: { nome?: unknown; ordem?: unknown } & DadosAcompanhamentos): Promise<CategoriaDTO> {
         const nome = this.validarNome(dados.nome);
+        const acompanhamentos = lerAcompanhamentos(dados);
         const ordemSolicitada = dados.ordem === undefined ? undefined : dados.ordem;
         if (ordemSolicitada !== undefined && !this.ehInteiroPositivo(ordemSolicitada)) {
             throw new ErroApi(400, "A ordem deve ser um número inteiro maior que zero");
@@ -54,7 +59,7 @@ export class CategoriaService {
                 });
 
                 const categoria = await tx.categoria.create({
-                    data: { id, nome, nomeNormalizado, ordem, ativo: true },
+                    data: { id, nome, nomeNormalizado, ordem, ativo: true, ingredientes: acompanhamentos.ingredientes ?? [], adicionais: acompanhamentos.adicionais ?? [] },
                 });
                 return paraDto(categoria);
             }, true);
@@ -64,13 +69,13 @@ export class CategoriaService {
         }
     }
 
-    async atualizar(id: number, dados: { nome?: unknown; ativo?: unknown }): Promise<CategoriaDTO> {
+    async atualizar(id: number, dados: { nome?: unknown; ativo?: unknown } & DadosAcompanhamentos): Promise<CategoriaDTO> {
         if (!idInteiroValido(id)) throw new ErroApi(404, MENSAGEM_CATEGORIA_NAO_ENCONTRADA);
         try {
             return await emTransacao(this.prisma, async (tx) => {
                 const existente = await tx.categoria.findUnique({ where: { id } });
                 if (!existente) throw new ErroApi(404, MENSAGEM_CATEGORIA_NAO_ENCONTRADA);
-                if (dados.nome === undefined && dados.ativo === undefined) {
+                if (dados.nome === undefined && dados.ativo === undefined && dados.ingredientes === undefined && dados.adicionais === undefined) {
                     throw new ErroApi(400, "Informe ao menos um campo para alterar");
                 }
 
@@ -92,6 +97,9 @@ export class CategoriaService {
                     }
                     alteracoes.ativo = dados.ativo;
                 }
+                const acompanhamentos = lerAcompanhamentos(dados);
+                if (acompanhamentos.ingredientes !== undefined) alteracoes.ingredientes = acompanhamentos.ingredientes;
+                if (acompanhamentos.adicionais !== undefined) alteracoes.adicionais = acompanhamentos.adicionais;
 
                 const atualizada = await tx.categoria.updateMany({ where: { id }, data: alteracoes });
                 if (atualizada.count === 0) throw new ErroApi(404, MENSAGEM_CATEGORIA_NAO_ENCONTRADA);
@@ -167,6 +175,30 @@ function idInteiroValido(id: number): boolean {
     return Number.isInteger(id) && id > 0 && id <= 2_147_483_647;
 }
 
-function paraDto(categoria: { id: number; nome: string; ordem: number; ativo: boolean }): CategoriaDTO {
-    return { id: categoria.id, nome: categoria.nome, ordem: categoria.ordem, ativo: categoria.ativo };
+function paraDto(categoria: { id: number; nome: string; ordem: number; ativo: boolean; ingredientes?: string[]; adicionais?: AdicionalNoBanco[] }): CategoriaDTO {
+    return {
+        id: categoria.id,
+        nome: categoria.nome,
+        ordem: categoria.ordem,
+        ativo: categoria.ativo,
+        // Categorias antigas não têm os campos gravados: valem como listas vazias.
+        ingredientes: categoria.ingredientes ?? [],
+        adicionais: (categoria.adicionais ?? []).map((adicional) => ({ nome: adicional.nome, preco: reaisDoBanco(adicional.precoCentavos) })),
+    };
+}
+
+// Valida os acompanhamentos e adicionais base com as mesmas regras do produto.
+// Campo ausente fica de fora; o erro de validação vira 400.
+function lerAcompanhamentos(dados: DadosAcompanhamentos): { ingredientes?: string[]; adicionais?: AdicionalNoBanco[] } {
+    try {
+        return {
+            ingredientes: dados.ingredientes === undefined ? undefined : validarIngredientes(dados.ingredientes as string[]),
+            adicionais: dados.adicionais === undefined
+                ? undefined
+                : validarAdicionais(dados.adicionais as AdicionalProduto[]).map(({ nome, centavos }) => ({ nome, precoCentavos: BigInt(centavos) })),
+        };
+    } catch (erro) {
+        if (erro instanceof ErroDeValidacao) throw new ErroApi(400, erro.message);
+        throw erro;
+    }
 }

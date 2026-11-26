@@ -20,6 +20,9 @@ model Categoria {
   nomeNormalizado String @unique
   ordem Int
   ativo Boolean @default(true)
+  // Base que vale para todos os produtos da categoria.
+  ingredientes String[]
+  adicionais Adicional[]
   produtos Produto[]
   @@index([ordem, id])
   @@map("categorias")

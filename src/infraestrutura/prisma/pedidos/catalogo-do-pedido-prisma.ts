@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { combinarComCategoria } from "../../../dominio/cardapio/acompanhamentos";
 import { Dinheiro } from "../../../dominio/compartilhado/dinheiro";
 import { BairroParaPedido, CatalogoDoPedido, MotoboyParaPedido, ProdutoParaPedido } from "../../../dominio/pedidos/catalogo-do-pedido";
 
@@ -8,15 +9,20 @@ export class CatalogoDoPedidoPrisma implements CatalogoDoPedido {
     async buscarProduto(id: number): Promise<ProdutoParaPedido | null> {
         const produto = await this.prisma.produto.findUnique({
             where: { id },
-            include: { categoria: { select: { ativo: true } } },
+            include: { categoria: { select: { ativo: true, ingredientes: true, adicionais: true } } },
         });
         if (!produto) return null;
+        // O pedido aceita os acompanhamentos e adicionais da categoria mais os do próprio produto.
+        const { ingredientes, adicionais } = combinarComCategoria(
+            { ingredientes: produto.categoria.ingredientes ?? [], adicionais: produto.categoria.adicionais ?? [] },
+            { ingredientes: produto.ingredientes, adicionais: produto.adicionais },
+        );
         return {
             id: produto.id,
             nome: produto.nome,
             preco: Dinheiro.deCentavos(Number(produto.precoCentavos)),
-            ingredientes: produto.ingredientes,
-            adicionais: produto.adicionais.map((adicional) => ({
+            ingredientes,
+            adicionais: adicionais.map((adicional) => ({
                 nome: adicional.nome,
                 preco: Dinheiro.deCentavos(Number(adicional.precoCentavos)),
             })),
